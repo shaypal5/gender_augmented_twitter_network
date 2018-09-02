@@ -63,10 +63,10 @@ Complexity
 
 Define ``l7`` to be the number of lines in the *twitter7* dataset and ``u7`` to be the number of users in it. Define ``u10`` to be the number of users in the ``kwak10www`` dataset. Finally, define ``u`` to be the number of users in the intersection of both user lists.
 
-1. Phase 1 reads through ``l7`` lines once, and writes ``u7`` lines to disk.
-2. Phase 2 reads through ``u10`` lines once, sorts them in-memory in :math:`O(log u10)` and writes ``u10`` lines.
-3. Phase 3 merges two sorted lists in time :math:`O(u7+u10)` and write ``u`` lines to disk.
-4. Phase 4 runs the gender prediction algorithm ``u`` times and writes ``u`` lines to disk.
+1. Phase 1 runs in :math:`O(l7+u7) ~ O(l7)`, as it reads through ``l7`` lines once, and writes ``u7`` lines to disk.
+2. Phase 2 runs in :math:`O(u10)`, as it reads through ``u10`` lines once, sorts them in-memory in :math:`O(log u10)` and writes ``u10`` lines.
+3. Phase 3 runs in :math:`O(u7+u10)`, as it merges two sorted lists in time :math:`O(u7+u10)` and write ``u`` lines to disk.
+4. Phase 4 runs in :math:`O(u)`, as it calls the gender prediction algorithm ``u`` times and writes ``u`` lines to disk.
 
 
 License
