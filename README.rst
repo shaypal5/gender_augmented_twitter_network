@@ -35,7 +35,7 @@ Dependencies
 Process
 -------
 
-The generation process is simple:
+The generation process is composed of several stages:
 
 1. The first phase reads through the *twitter7* dataset. Since this dataset consists of chronologically-ordered tweets, this phase uses a single pass to construct two intermediate resources required for the generation process:
 
@@ -51,12 +51,22 @@ The generation process is simple:
    .. code-block:: python
 
      britishcoala i like donuts have you seen the game yesterday ... i'm closing my tweeter account !
+     
+   The resulting format, where all tweets by a single user are concatenated into a single line, seperated by single whitespaces, matches the input format of a piece of code down the line in the process
   
 2. The second phase reads through the ``numeric2screen.tar.gz`` file of the *kwak10www* dataset and produces a lexicographically sorted handle-to-numeric-id mapping of the users in the *kwak10www* dataset.
 
+3. The third stage runs
 
 Complexity
 ----------
+
+Define ``l7`` to be the number of lines in the *twitter7* dataset and ``u7`` to be the number of users in it. Define ``u10`` to be the number of users in the ``kwak10www`` dataset. Finally, define ``u`` to be the number of users in the intersection of both user lists.
+
+1. Phase 1 reads through ``l7`` lines once, and writes ``u7`` lines to disk.
+2. Phase 2 reads through ``u10`` lines once, sorts them in-memory in :math:`O(log u10)` and writes ``u10`` lines.
+3. Phase 3 merges two sorted lists in time :math:`O(u7+u10)` and write ``u`` lines to disk.
+4. Phase 4 runs the gender prediction algorithm ``u`` times and writes ``u`` lines to disk.
 
 
 License
