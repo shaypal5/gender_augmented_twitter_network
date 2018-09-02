@@ -46,7 +46,7 @@ The generation process is composed of several stages:
 
      u x1,1 x1,2 ... xn,1 ... xn,m
 
-   Where ``u`` is the username (or Twitter handle) of the user, ``x1,1`` is the first word of the first tweet by him encoutered in the pass, ``x1,2`` is the second word of that tweet, ``xn,1`` is the first word of the last (n-th) tweet by him encoutered in the pass and ``xn,m`` is the last (m-th) word in that last tweet. An example line is:
+   Where ``u`` is the username (or Twitter handle) of the user, ``x1,1`` is the first word of the first tweet by him encoutered in the pass, ``x1,2`` is the second word of that tweet, ``xn,1`` is the first word of the last (n-th) tweet by him encoutered in the pass and ``xn,m`` is the last (m-th) word in that last tweet. An example line, for a user with the handle ``britishcoala`` is:
    
    .. code-block:: python
 
@@ -56,17 +56,26 @@ The generation process is composed of several stages:
   
 2. The second phase reads through the ``numeric2screen.tar.gz`` file of the *kwak10www* dataset and produces a lexicographically sorted handle-to-numeric-id mapping of the users in the *kwak10www* dataset.
 
-3. The third stage runs
+3. The third stage merges the two sorted lists of user handles to create a lexicographically sorted list of the intersection between the two lists.
+
+4. The fourth stage runs each line - in the user-wise merged tweets files - belonging to a user in the intersection list through the `SPEKS gender predictor for Twitter <https://github.com/shaypal5/speks>`_, and generates a lexicographically sorted user-handle-to-gender mapping.
+
+5. The fifth stage uses the aforementioned handle-to-numeric-id mapping to transform the user-handle-to-gender mapping into a user-id-to-gender mapping.
+
+6. Finally, the sixth stage
+
 
 Complexity
 ----------
 
-Define ``l7`` to be the number of lines in the *twitter7* dataset and ``u7`` to be the number of users in it. Define ``u10`` to be the number of users in the ``kwak10www`` dataset. Finally, define ``u`` to be the number of users in the intersection of both user lists.
+Define ``l7`` to be the number of lines in the *twitter7* dataset and ``u7`` to be the number of users in it. Define ``u10`` to be the number of users in the ``kwak10www`` dataset and ``l10`` the number of lines (i.e. edges) in it. Finally, define ``u`` to be the number of users in the intersection of both user lists.
 
-1. Phase 1 runs in :math:`O(l7+u7) ~ O(l7)`, as it reads through ``l7`` lines once, and writes ``u7`` lines to disk.
-2. Phase 2 runs in :math:`O(u10)`, as it reads through ``u10`` lines once, sorts them in-memory in :math:`O(log u10)` and writes ``u10`` lines.
+1. Phase 1 runs in :math:`O(u7 log(u7)+l7+u7) ~ O(u7 log(u7))`, as it reads through ``l7`` lines once, and writes ``u7`` lines to disk.
+2. Phase 2 runs in :math:`O(u10 log(u10))`, as it reads through ``u10`` lines once, sorts them in-memory in :math:`O(u10 log u10)` and writes ``u10`` lines.
 3. Phase 3 runs in :math:`O(u7+u10)`, as it merges two sorted lists in time :math:`O(u7+u10)` and write ``u`` lines to disk.
 4. Phase 4 runs in :math:`O(u)`, as it calls the gender prediction algorithm ``u`` times and writes ``u`` lines to disk.
+4. Phase 5 runs in :math:`O(u)`, as it performs a single pass through a ``u``-lines-long file and writes ``u`` lines to disk.
+4. Phase 6 runs in :math:`O(l10 * log(u))`, as reads ``l10`` lines, performs ``l1`` searches in a ``u``-sized hash table, and writes ``l10`` lines to disk.
 
 
 License
