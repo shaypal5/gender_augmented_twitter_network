@@ -38,17 +38,18 @@ Process
 The generation process is simple:
 
 1. The first phase reads through the *twitter7* dataset. Since this dataset consists of chronologically-ordered tweets, this phase uses a single pass to construct two intermediate resources required for the generation process:
-  - A lexicographically sorted list of all usernames whose tweets are included in the dataset.
-  - A lexicographically sorted, user-wise merging of the tweets in the dataset, resulting in a set of files in the following format:
 
-  .. code-block:: python
-    
+   a) A lexicographically sorted list of all usernames whose tweets are included in the dataset.
+   b) A lexicographically sorted, user-wise merging of the tweets in the dataset, resulting in a set of files in the following format:
+
+   .. code-block:: python
+
      u x1,1 x1,2 ... xn,1 ... xn,m
-     
-  Where ``u`` is the username (or Twitter handle) of the user, ``x1,1`` is the first word of the first tweet by him encoutered in the pass, ``x1,2`` is the second word of that tweet, ``xn,1`` is the first word of the last (n-th) tweet by him encoutered in the pass and ``xn,m`` is the last (m-th) word in that last tweet. An example line is:
-  
-    .. code-block:: python
-    
+
+   Where ``u`` is the username (or Twitter handle) of the user, ``x1,1`` is the first word of the first tweet by him encoutered in the pass, ``x1,2`` is the second word of that tweet, ``xn,1`` is the first word of the last (n-th) tweet by him encoutered in the pass and ``xn,m`` is the last (m-th) word in that last tweet. An example line is:
+   
+   .. code-block:: python
+
      britishcoala i like donuts have you seen the game yesterday ... i'm closing my tweeter account !
   
 2. The second phase reads through the ``numeric2screen.tar.gz`` file of the *kwak10www* dataset and produces a lexicographically sorted handle-to-numeric-id mapping of the users in the *kwak10www* dataset.
