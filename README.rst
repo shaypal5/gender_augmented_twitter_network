@@ -68,7 +68,7 @@ The generation process is composed of several stages:
 Complexity
 ----------
 
-Define ``l7`` to be the number of lines in the *twitter7* dataset and ``u7`` to be the number of users in it. Define ``u10`` to be the number of users in the ``kwak10www`` dataset and ``l10`` the number of lines (i.e. edges) in it. Finally, define ``u`` to be the number of users in the intersection of both user lists.
+Define ``l7`` to be the number of lines in the *twitter7* dataset and ``u7`` to be the number of users in it. Define ``u10`` to be the number of users in the *kwak10www* dataset and ``l10`` the number of lines (i.e. edges) in it. Finally, define ``u`` to be the number of users in the intersection of both user lists.
 
 1. Phase 1 runs in :math:`O(u7 log(u7)+l7+u7) ~ O(u7 log(u7))`, as it reads through ``l7`` lines once, and writes ``u7`` lines to disk.
 
