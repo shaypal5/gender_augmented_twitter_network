@@ -1,7 +1,7 @@
 twikwak17: A gender-augmented Twitter network dataset
 #####################################################
 
-This repository contains a gender-augmented Twitter network dataaset, the code to generate it from two specific existing Twitter datasets, and an overview of both.
+This repository contains *twikwak17*, a gender-augmented Twitter network dataset, the code to generate it from two specific existing Twitter datasets, and an overview of both.
 
 .. contents:: Table of Contents
 
