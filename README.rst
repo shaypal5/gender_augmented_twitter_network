@@ -18,6 +18,11 @@ Etymology
 The generation process of this dataset depends on two existing datasets, *kwak10www* and *twitter7* (see `Dependencies`_ for more information), and so the amelgamation of both names into *twikwak17* was chosen.
 
 
+Stats
+-----
+
+Node intersection, resulting network size, etc..
+
 
 Generation
 ==========
@@ -81,12 +86,6 @@ Define ``l7`` to be the number of lines in the *twitter7* dataset and ``u7`` to 
 5. Phase 5 runs in :math:`O(u)`, as it performs a single pass through a ``u``-lines-long file and writes ``u`` lines to disk.
 
 6. Phase 6 runs in :math:`O(l10 * log(u))`, as reads ``l10`` lines, performs ``l1`` searches in a ``u``-sized hash table, and writes ``l10`` lines to disk.
-
-
-Stats
-=====
-
-Node intersection, resulting network size, etc..
 
 
 License
