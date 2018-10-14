@@ -83,6 +83,12 @@ Define ``l7`` to be the number of lines in the *twitter7* dataset and ``u7`` to 
 6. Phase 6 runs in :math:`O(l10 * log(u))`, as reads ``l10`` lines, performs ``l1`` searches in a ``u``-sized hash table, and writes ``l10`` lines to disk.
 
 
+Stats
+=====
+
+Node intersection, resulting network size, etc..
+
+
 License
 =======
 
