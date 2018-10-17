@@ -8,14 +8,14 @@ import versioneer
 
 
 INSTALL_REQUIRES = [
+	'click',
+    'birch>=0.0.13',
     'sortedcontainers>=2.0',
     'ezenum>=0.0.3',
 ]
 TEST_REQUIRES = [
     # testing and coverage
     'pytest', 'coverage', 'pytest-cov',
-    # unmandatory dependencies of the package itself
-    'pandas',
     # to be able to run `python setup.py checkdocs`
     'collective.checkdocs', 'pygments',
 ]
@@ -39,9 +39,11 @@ setuptools.setup(
     install_requires=INSTALL_REQUIRES,
     extras_require={
         'test': TEST_REQUIRES + INSTALL_REQUIRES,
-        # 'fasttext': FT_REQUIRES,
     },
-    # dependency_links=DEPENDENCY_LINKS,
+    entry_points='''
+        [console_scripts]
+        twikwak=scripts.twikwak_cli:cli
+    ''',
     classifiers=[
         # Trove classifiers
         # (https://pypi.python.org/pypi?%3Aaction=list_classifiers)
