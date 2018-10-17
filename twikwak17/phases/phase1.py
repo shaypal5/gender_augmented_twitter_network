@@ -29,7 +29,10 @@ def interpret_line(decoded_line):
         return LINETYPE.Other, ''
 
 
-def dump_usr_2_twits_str_to_file(usr_2_twits_str):
+def dump_usr_2_twits_str_to_file(usr_2_twits_str, fpath):
+    with gzip.open(fpath, 'wb') as f:
+        for user, tweets in usr_2_twits_str.items():
+            f.write('{} {}\n'.format(user, tweets))
 
 
 NO_CONTENT_STR = 'No Post Title'
