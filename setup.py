@@ -1,4 +1,4 @@
-"""Setup for the skift package."""
+"""Setup for the twikwak17 package."""
 
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
@@ -7,21 +7,10 @@ import setuptools
 import versioneer
 
 
-# DEPENDENCY_LINKS = [
-#     (
-#         'git+https://github.com/facebookresearch/fastText.git'
-#         '@3b5fd293597de550a131d81436b9755902f39bb2'
-#         '#egg=fasttext-0.1.0+git.3b5fd29'
-#     ),
-# ]
 INSTALL_REQUIRES = [
-    'numpy',
-    'scipy',
-    'scikit-learn',
+    'sortedcontainers>=2.0',
+    'ezenum>=0.0.3',
 ]
-# FT_REQUIRES = INSTALL_REQUIRES + [
-#     'fasttext==0.1.0+git.3b5fd29',
-# ]
 TEST_REQUIRES = [
     # testing and coverage
     'pytest', 'coverage', 'pytest-cov',
@@ -37,13 +26,13 @@ with open('README.rst') as f:
 setuptools.setup(
     author="Shay Palachy",
     author_email="shay.palachy@gmail.com",
-    name='skift',
+    name='twikwak17',
     license="MIT",
-    description='scikit-learn wrappers for Python fastText',
+    description='A gender-augmented Twitter network dataset.',
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
     long_description=README,
-    url='https://github.com/shaypal5/skift',
+    url='https://github.com/shaypal5/twikwak17',
     packages=setuptools.find_packages(),
     include_package_data=True,
     python_requires=">=3.5",
@@ -61,6 +50,7 @@ setuptools.setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'Intended Audience :: Developers',

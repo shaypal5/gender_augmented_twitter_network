@@ -2,8 +2,8 @@
 branch = True
 omit =
     tests/*
-    skift/scripts/*
-    skift/_version.py
+    twikwak17/scripts/*
+    twikwak17/_version.py
     */__init__.py
 [report]
 show_missing = True

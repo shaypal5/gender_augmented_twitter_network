@@ -2,25 +2,15 @@ language: python
 python:
   - '3.5'
   - '3.6'
-# env:
-#   - TO_RUN=TESTS
-#   - TO_RUN=BUILD
-# notifications:
-#   email:
-#     on_success: change
-#     on_failure: always
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
 before_install:
-  # - pip install cython
-  # - pip install numpy pandas scipy
-  # - git clone https://github.com/facebookresearch/fastText.git
-  # - cd fastText
-  # - pip install .
-  # - cd ..
-  # - pip install scikit-learn
-  - pip install git+https://github.com/facebookresearch/fastText.git@ca8c5face7d5f3a64fff0e4dfaf58d60a691cb7c
   - pip install codecov
 install:
-       pip install ".[test]" --process-dependency-links 
+       pip install ".[test]" 
 script: pytest
 after_success:
   - codecov

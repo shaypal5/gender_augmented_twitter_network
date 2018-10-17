@@ -1,2 +1,2 @@
 include versioneer.py
-include skift/_version.py
+include twikwak17/_version.py
