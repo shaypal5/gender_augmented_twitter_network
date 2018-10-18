@@ -1,11 +1,17 @@
 """Phase 1 of the twikwak17 dataset generation process."""
 
 import gzip
+import json
 from psutil import virtual_memory
 from time import time
 
 from ezenum import StringEnum
 from sortedcontainers import SortedDict
+
+from twikwak17.shared import (
+   qprint,
+)
+
 
 LINETYPE = StringEnum(['Time', 'User', 'Content', 'Other'])
 
@@ -29,22 +35,26 @@ def interpret_line(decoded_line):
         return LINETYPE.Other, ''
 
 
-def dump_usr_2_twits_str_to_file(usr_2_twits_str, fpath):
-    with gzip.open(fpath, 'wb') as f:
+def dump_usr_2_twits_str_to_file(usr_2_twits_str, tweets_fpath, usr_fpath):
+    with gzip.open(tweets_fpath, 'wt') as f:
         for user, tweets in usr_2_twits_str.items():
             f.write('{} {}\n'.format(user, tweets))
+    with open(usr_fpath, 'w') as f:
+        json.dump(list(usr_2_twits_str.keys()), f)
 
 
 NO_CONTENT_STR = 'No Post Title'
 MONITOR_LINE_FREQ_DEF = 1000000
-MIN_AVAIL_MEM_BYTES_DEF = 500 * 1000000
+BYTES_IN_MB = 1000000
+MIN_AVAIL_MEM_MB_DEF = 500
 REPORT_TEMPLATE = (
     '{:.2f} min running | {} lines processed | ~ {} tweets processed |'
-    ' {} tpm | {} available memory'
+    ' {} tpm | {} files written | {} available memory'
 )
 
 
-def merge_user_tweets_in_file(fpath, monitor_line_freq=None, min_mem_mb=None):
+def merge_user_tweets_in_file(
+        fpath, monitor_line_freq=None, min_mem_mb=None):
     """Splits a raw twitter7 tweets file into user-merged subset files.
 
     The user order in each resulting file is lexicographical.
@@ -62,35 +72,67 @@ def merge_user_tweets_in_file(fpath, monitor_line_freq=None, min_mem_mb=None):
     if monitor_line_freq is None:
         monitor_line_freq = MONITOR_LINE_FREQ_DEF
     if min_mem_mb is None:
-        min_mem_mb = MIN_AVAIL_MEM_BYTES_DEF
+        min_mem_mb = MIN_AVAIL_MEM_MB_DEF
+    min_mem_bytes = min_mem_mb * BYTES_IN_MB
+    qprint((
+        "Merging tweets by user in {}."
+        "\nMonitor line frequency is {} and min allowed memory (MB) is {}."
+    ).format(fpath, monitor_line_freq, min_mem_mb))
     most_recent_user = None
     # starting_available_mem = virtual_memory().available
     start_time = time()
     usr_2_twits_str = SortedDict()
-    with gzip.open(fpath, 'r') as textf:
+    files_written = 0
+
+    def _report():
+        av_mem = virtual_memory().available
+        seconds_running = time() - start_time
+        report = REPORT_TEMPLATE.format(
+            seconds_running / 60,
+            i,
+            i / 4,
+            (i / 4) / (seconds_running / 60),
+            files_written,
+            av_mem,
+        )
+        qprint(report, end='\r')
+
+    def _dump_file():
+        nonlocal usr_2_twits_str, files_written
+        dump_fpath = '{}_p1dump_{}.txt.gz'.format(
+            fpath[:fpath.find('.')], files_written)
+        usr_fpath = '{}_p1usr_{}.json'.format(
+            fpath[:fpath.find('.')], files_written)
+        dump_usr_2_twits_str_to_file(
+            usr_2_twits_str=usr_2_twits_str,
+            tweets_fpath=dump_fpath,
+            usr_fpath=usr_fpath,
+        )
+        files_written += 1
+        usr_2_twits_str = SortedDict()
+        # qprint('Tweets dumped for the {}-th time into {}'.format(
+        #     files_written, dump_fpath))
+        # qprint('Tweets dumped for the {}-th time into {}'.format(
+        #     files_written, dump_fpath))
+
+    with gzip.open(fpath, 'rt') as textf:
         for i, line in enumerate(textf):
             try:
-                decoded_line = line.decode('utf-8')
-                ltype, lcontent = interpret_line(decoded_line)
+                ltype, lcontent = interpret_line(line)
                 if ltype == LINETYPE.User:
                     most_recent_user = lcontent
                 elif ltype == LINETYPE.Content and lcontent != NO_CONTENT_STR:
                     usr_2_twits_str[most_recent_user] = usr_2_twits_str.get(
                         most_recent_user, '') + ' ' + lcontent
             except Exception as e:
-                print(decoded_line)
-                print(interpret_line(decoded_line))
+                qprint(line)
+                qprint(interpret_line(line))
                 raise e
             if i % monitor_line_freq == 0:
+                _report()
                 av_mem = virtual_memory().available
-                seconds_running = time() - start_time
-                report = REPORT_TEMPLATE.format(
-                    seconds_running / 60,
-                    i,
-                    i / 4,
-                    (i / 4) / (seconds_running / 60),
-                    av_mem,
-                )
-                print(report, end='\r')
-                if av_mem < min_mem_mb:
-                    return
+                if av_mem < min_mem_bytes:
+                    _dump_file()
+    if len(usr_2_twits_str) > 0:
+        _dump_file()
+        _report()
