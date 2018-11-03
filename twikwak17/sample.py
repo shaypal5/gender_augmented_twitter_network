@@ -4,7 +4,6 @@ import os
 import gzip
 
 from twikwak17.shared import (
-    TWIK_CFG,
     DEF_FNAMES,
     default_source_dpath,
     sample_dpath_by_source_dpath,
@@ -32,8 +31,7 @@ def sample_twitter7_file(
     """
     _print = (lambda x: x) if quiet else print
     if source_fpath is None:
-        source_dpath = TWIK_CFG['source_dir']
-        source_fpath = os.path.join(source_dpath, DEF_FNAMES[0])
+        source_fpath = os.path.join(default_source_dpath(), DEF_FNAMES[0])
     else:
         source_dpath = os.path.dirname(source_fpath)
     if target_fpath is None:
@@ -71,3 +69,12 @@ def sample_twitter7_folder(
         "Generating a sample of {} tweets per file from {},"
         " writing sample files to {}").format(
             num_tweets, source_dpath, target_dpath))
+    for fname in os.listdir(source_dpath):
+        fname_no_ext = fname[:-7]  # assuming .txt.gz extension
+        sample_fname = '{}_sample_{}.txt.gz'.format(fname_no_ext, num_tweets)
+        sample_twitter7_file(
+            num_tweets=num_tweets,
+            source_fpath=os.path.join(source_dpath, fname),
+            target_fpath=os.path.join(target_dpath, sample_fname),
+            quiet=quiet,
+        )
