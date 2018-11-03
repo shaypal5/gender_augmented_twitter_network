@@ -6,12 +6,14 @@ import gzip
 from twikwak17.shared import (
     TWIK_CFG,
     DEF_FNAMES,
+    default_source_dpath,
+    sample_dpath_by_source_dpath,
 )
 
 
-def sample_twitter7(
+def sample_twitter7_file(
         num_tweets, source_fpath=None, target_fpath=None, quiet=False):
-    """Generate a sample of twitter7 to test the pipeline.
+    """Generates a sample of a twitter7 file (usefull for pipeline testing).
 
     Parameters
     ----------
@@ -45,3 +47,27 @@ def sample_twitter7(
                 if i >= num_tweets * 4:
                     print("Sample file generated. Terminating.")
                     return
+
+
+def sample_twitter7_folder(
+        num_tweets, source_dpath=None, quiet=False):
+    """Generates a sample of a twitter7 folder (usefull for pipeline testing).
+
+    Parameters
+    ----------
+    num_tweets : int
+        The sample size, in tweets, per file.
+    source_dpath : str, optional
+        The full path to the source folder to sample. If not given, the source
+        folder path is looked up in twikwak 'source_dir' configuration value.
+    quiet : boolean, default False
+        Is set to True, all messages are silenced.
+    """
+    _print = (lambda x: x) if quiet else print
+    if source_dpath is None:
+        source_dpath = default_source_dpath()
+    target_dpath = sample_dpath_by_source_dpath(source_dpath)
+    _print((
+        "Generating a sample of {} tweets per file from {},"
+        " writing sample files to {}").format(
+            num_tweets, source_dpath, target_dpath))
