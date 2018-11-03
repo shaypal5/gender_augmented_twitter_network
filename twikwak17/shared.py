@@ -9,9 +9,10 @@ from birch import Birch
 
 TWIK_CFG = Birch('twikwak17')
 
-DEF_FNAME_PATTERN = 'tweets2009-{:02d}.txt.gz'
+DEF_FNAME_PATTERN = 'tweets2009-\d+.txt.gz'
+DEF_FNAME_TEMPLATE = 'tweets2009-{:02d}.txt.gz'
 DEF_FNAMES = [
-    DEF_FNAME_PATTERN.format(month)
+    DEF_FNAME_TEMPLATE.format(month)
     for month in range(6, 13)
 ]
 
@@ -20,12 +21,13 @@ def default_source_dpath():
     return TWIK_CFG.get('source_dir', None)
 
 
-DEF_SAMPLE_DNAME = 'sample_files'
+DEF_SAMPLE_DNAME_TEMPLATE = 'sample_files'
 
 
-def sample_dpath_by_source_dpath(source_dpath):
+def sample_dpath_by_source_dpath(source_dpath, sample_size):
     if source_dpath:
-        return os.join(source_dpath, DEF_SAMPLE_DNAME)
+        fname = '{}_sized_sample_files'.format(sample_size)
+        return os.path.join(source_dpath, DEF_SAMPLE_DNAME)
     return None
 
 

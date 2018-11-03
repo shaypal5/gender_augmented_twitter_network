@@ -17,10 +17,10 @@ SILENT = click.option(
 )
 
 
-SAMPLE_DOC = "Generate a sample of the twitter7 dataset."
+SAMPLE_FILE_DOC = "Generate a sample of a twitter7 file."
 
 
-@cli.command(help=SAMPLE_DOC + (
+@cli.command(help=SAMPLE_FILE_DOC + (
     "\n\n Arguments:\n\n SIZE The the sample size, in tweets."
 ))
 @click.argument("size", type=int, nargs=1)
@@ -33,6 +33,27 @@ SAMPLE_DOC = "Generate a sample of the twitter7 dataset."
     help="The path to the target sample file."
 )
 @SILENT
-def sample(size, source, target, quiet):
+def sample_file(size, source, target, quiet):
+    """{}""".format(SAMPLE_FILE_DOC)
+    twikwak17.sample_twitter7_file(size, source, target, quiet)
+
+
+SAMPLE_DOC = "Generate a sample of the twitter7 dataset."
+
+
+@cli.command(help=SAMPLE_DOC + (
+    "\n\n Arguments:\n\n SIZE The the sample size, in tweets."
+))
+@click.argument("size", type=int, nargs=1)
+@click.option(
+    '-s', '--source', type=str,
+    help="The path to the source twitter7 folder."
+)
+@click.option(
+    '-t', '--target', type=str,
+    help="The path to the target sample folder."
+)
+@SILENT
+def sample_folder(size, source, target, quiet):
     """{}""".format(SAMPLE_DOC)
-    twikwak17.sample_twitter7(size, source, target, quiet)
+    twikwak17.sample_twitter7_folder(size, source, target, quiet)
