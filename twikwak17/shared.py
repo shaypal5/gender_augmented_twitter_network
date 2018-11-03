@@ -27,7 +27,7 @@ DEF_SAMPLE_DNAME_TEMPLATE = 'sample_files'
 def sample_dpath_by_source_dpath(source_dpath, sample_size):
     if source_dpath:
         fname = '{}_sized_sample_files'.format(sample_size)
-        return os.path.join(source_dpath, DEF_SAMPLE_DNAME)
+        return os.path.join(source_dpath, fname)
     return None
 
 
