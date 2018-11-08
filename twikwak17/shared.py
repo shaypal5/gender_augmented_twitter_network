@@ -34,6 +34,10 @@ def sample_dpath_by_source_dpath(source_dpath, sample_size):
 def default_sample_dpath():
     return sample_dpath_by_source_dpath(default_source_dpath())
 
+def phase1_output_dpath(source_dpath):
+    return source_dpath
+
+
 
 # === pringting ===
 
@@ -49,7 +53,8 @@ def set_print_quiet(set_val):
         If True, message printing is turned off. Otherwise, it is turned on.
     """
     global QUIET
-    QUIET = set_val
+    if set_val is not None:
+        QUIET = set_val
 
 
 def qprint(*args, **kwargs):

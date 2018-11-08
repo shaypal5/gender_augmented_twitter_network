@@ -1,5 +1,6 @@
 """Phase 1 of the twikwak17 dataset generation process."""
 
+import os
 import gzip
 import json
 from psutil import virtual_memory
@@ -9,7 +10,12 @@ from ezenum import StringEnum
 from sortedcontainers import SortedDict
 
 from twikwak17.shared import (
-   qprint,
+    set_print_quiet,
+    qprint,
+    DEF_FNAME_PATTERN,
+    DEF_FNAMES,
+    default_source_dpath,
+    sample_dpath_by_source_dpath,
 )
 
 
@@ -136,3 +142,33 @@ def merge_user_tweets_in_file(
     if len(usr_2_twits_str) > 0:
         _dump_file()
         _report()
+
+
+def phase1(source_dpath, quiet=None):
+    """Splits a raw twitter7 tweets file into user-merged subset files.
+
+    Parameters
+    ----------
+    source_dpath : str
+        The full qualified path to the twitter7 folder to process.
+    quiet : boolean, default False
+        Is set to True, all messages are silenced.
+    """
+    set_print_quiet(quiet)
+    if source_dpath is None:
+        source_dpath = default_source_dpath()
+    os.makedirs(target_dpath, exist_ok=True)
+    qprint((
+        "Generating a sample of {} tweets per file from {},"
+        " writing sample files to {}").format(
+            num_tweets, source_dpath, target_dpath))
+    for fname in os.listdir(source_dpath):
+        if not re.match(pattern=DEF_FNAME_PATTERN, string=fname):
+            continue
+        fname_no_ext = fname[:-7]  # assuming .txt.gz extension
+        sample_fname = '{}_sample_{}.txt.gz'.format(fname_no_ext, num_tweets)
+        merge_user_tweets_in_file(
+            fpath=os.path.join(source_dpath, fname),
+            target_fpath=os.path.join(target_dpath, sample_fname),
+            quiet=quiet,
+        )

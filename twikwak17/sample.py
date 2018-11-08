@@ -5,6 +5,8 @@ import re
 import gzip
 
 from twikwak17.shared import (
+    set_print_quiet,
+    qprint,
     DEF_FNAME_PATTERN,
     DEF_FNAMES,
     default_source_dpath,
@@ -31,21 +33,21 @@ def sample_twitter7_file(
     quiet : boolean, default False
         Is set to True, all messages are silenced.
     """
-    _print = (lambda x: x) if quiet else print
+    set_print_quiet(quiet)
     if source_fpath is None:
         source_fpath = os.path.join(default_source_dpath(), DEF_FNAMES[0])
     else:
         source_dpath = os.path.dirname(source_fpath)
     if target_fpath is None:
         target_fpath = os.path.join(source_dpath, 'twitter7_sample.txt.gz')
-    _print("Generating a sample of {} tweets from {}, writing to {}".format(
+    qprint("Generating a sample of {} tweets from {}, writing to {}".format(
         num_tweets, source_fpath, target_fpath))
     with gzip.open(source_fpath, 'rt') as sourcef:
         with gzip.open(target_fpath, 'wt') as targetf:
             for i, line in enumerate(sourcef):
                 targetf.write(line)
                 if i >= num_tweets * 4:
-                    print("Sample file generated. Terminating.")
+                    qprint("Sample file generated. Terminating.")
                     return
 
 
@@ -67,13 +69,14 @@ def sample_twitter7_folder(
     quiet : boolean, default False
         Is set to True, all messages are silenced.
     """
-    _print = (lambda x: x) if quiet else print
+    set_print_quiet(quiet)
     if source_dpath is None:
         source_dpath = default_source_dpath()
     if target_dpath is None:
-        target_dpath = sample_dpath_by_source_dpath(source_dpath)
+        target_dpath = sample_dpath_by_source_dpath(
+            source_dpath=source_dpath, sample_size=num_tweets)
     os.makedirs(target_dpath, exist_ok=True)
-    _print((
+    qprint((
         "Generating a sample of {} tweets per file from {},"
         " writing sample files to {}").format(
             num_tweets, source_dpath, target_dpath))
