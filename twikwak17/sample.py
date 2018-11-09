@@ -9,8 +9,8 @@ from twikwak17.shared import (
     qprint,
     DEF_FNAME_PATTERN,
     DEF_FNAMES,
-    default_source_dpath,
-    sample_dpath_by_source_dpath,
+    twitter7_dpath,
+    sample_output_dpath_by_twitter7_dpath,
 )
 
 
@@ -35,7 +35,7 @@ def sample_twitter7_file(
     """
     set_print_quiet(quiet)
     if source_fpath is None:
-        source_fpath = os.path.join(default_source_dpath(), DEF_FNAMES[0])
+        source_fpath = os.path.join(twitter7_dpath(), DEF_FNAMES[0])
     else:
         source_dpath = os.path.dirname(source_fpath)
     if target_fpath is None:
@@ -71,9 +71,9 @@ def sample_twitter7_folder(
     """
     set_print_quiet(quiet)
     if source_dpath is None:
-        source_dpath = default_source_dpath()
+        source_dpath = twitter7_dpath()
     if target_dpath is None:
-        target_dpath = sample_dpath_by_source_dpath(
+        target_dpath = sample_output_dpath_by_twitter7_dpath(
             source_dpath=source_dpath, sample_size=num_tweets)
     os.makedirs(target_dpath, exist_ok=True)
     qprint((

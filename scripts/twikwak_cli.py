@@ -2,7 +2,16 @@
 
 import click
 
-import twikwak17
+# import twikwak17
+
+from .sample_cli import (
+    sample_file,
+    sample_folder,
+)
+from .shared_options import (
+    SILENT,
+    TPATH,
+)
 
 
 @click.group()
@@ -11,49 +20,30 @@ def cli():
     pass
 
 
-SILENT = click.option(
-    '-q', '--quiet/--verbose', default=False,
-    help="Don't print any messages to screen. Defaults to verbose."
-)
+cli.add_command(sample_file)
+cli.add_command(sample_folder)
 
 
-SAMPLE_FILE_DOC = "Generate a sample of a twitter7 file."
+RUN_PIPELINE_DOC = "Runs the entire twikwak17 generation pipeline."
 
 
-@cli.command(help=SAMPLE_FILE_DOC + (
-    "\n\n Arguments:\n\n SIZE The the sample size, in tweets."
+@cli.command(help=RUN_PIPELINE_DOC + (
+    "\n\n Can be configured by populating ~/.config/twikwak17/cfg.json."
 ))
-@click.argument("size", type=int, nargs=1)
+@TPATH
 @click.option(
-    '-s', '--source', type=str,
-    help="The path to the source twitter7 file."
+    '-k', '--kpath', type=str,
+    help=("The path to the kwak10www dataset folder. If not given, the value "
+          "keyed to 'kwak10_dpath' is looked up in the twikwak17 "
+          "configuration file.")
 )
 @click.option(
-    '-t', '--target', type=str,
-    help="The path to the target sample file."
+    '-o', '--output', type=str,
+    help=("The path to a designated output folder. If not given, the value "
+          "keyed to 'output_dpath' is looked up in the twikwak17 "
+          "configuration file.")
 )
 @SILENT
-def sample_file(size, source, target, quiet):
-    """{}""".format(SAMPLE_FILE_DOC)
-    twikwak17.sample_twitter7_file(size, source, target, quiet)
-
-
-SAMPLE_DOC = "Generate a sample of the twitter7 dataset."
-
-
-@cli.command(help=SAMPLE_DOC + (
-    "\n\n Arguments:\n\n SIZE The the sample size, in tweets."
-))
-@click.argument("size", type=int, nargs=1)
-@click.option(
-    '-s', '--source', type=str,
-    help="The path to the source twitter7 folder."
-)
-@click.option(
-    '-t', '--target', type=str,
-    help="The path to the target sample folder."
-)
-@SILENT
-def sample_folder(size, source, target, quiet):
-    """{}""".format(SAMPLE_DOC)
-    twikwak17.sample_twitter7_folder(size, source, target, quiet)
+def run_pipeline(tpath, kpath, output, quiet):
+    """{}""".format(RUN_PIPELINE_DOC)
+    print("{} {} {} {}".format(tpath, kpath, output, quiet))

@@ -14,8 +14,8 @@ from twikwak17.shared import (
     qprint,
     DEF_FNAME_PATTERN,
     DEF_FNAMES,
-    default_source_dpath,
-    sample_dpath_by_source_dpath,
+    twitter7_dpath,
+    sample_output_dpath_by_twitter7_dpath,
 )
 
 
@@ -156,7 +156,7 @@ def phase1(source_dpath, quiet=None):
     """
     set_print_quiet(quiet)
     if source_dpath is None:
-        source_dpath = default_source_dpath()
+        source_dpath = twitter7_dpath()
     os.makedirs(target_dpath, exist_ok=True)
     qprint((
         "Generating a sample of {} tweets per file from {},"
