@@ -2,7 +2,7 @@
 
 import click
 
-# import twikwak17
+import twikwak17
 
 from .sample_cli import (
     sample_file,
@@ -46,4 +46,5 @@ RUN_PIPELINE_DOC = "Runs the entire twikwak17 generation pipeline."
 @SILENT
 def run_pipeline(tpath, kpath, output, quiet):
     """{}""".format(RUN_PIPELINE_DOC)
-    print("{} {} {} {}".format(tpath, kpath, output, quiet))
+    twikwak17.shared.set_print_quiet(quiet)
+    twikwak17.run_pipeline(tpath, kpath, output)

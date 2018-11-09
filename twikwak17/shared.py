@@ -8,6 +8,7 @@ from birch import Birch
 # === configuration ===
 
 TWIK_CFG = Birch('twikwak17')
+TWIK_CFG_FPATH = '~/.config/twikwak17/cfg.json'
 
 
 class CfgKey(object):
@@ -44,11 +45,20 @@ def configured_sample_output_dpath():
     return sample_output_dpath_by_twitter7_dpath(twitter7_dpath())
 
 
-def phase1_output_dpath(source_dpath):
-    return source_dpath
+def phase_output_dname(phase_ix):
+    return 'phase_{}_output'.format(phase_ix)
 
 
-# === pringting ===
+def phase_output_dpath(phase_ix, output_dpath):
+    dpath = os.path.join(
+        output_dpath,
+        phase_output_dname(phase_ix),
+    )
+    os.makedirs(dpath, exist_ok=True)
+    return dpath
+
+
+# === printing ===
 
 QUIET = False
 
@@ -64,6 +74,10 @@ def set_print_quiet(set_val):
     global QUIET
     if set_val is not None:
         QUIET = set_val
+
+
+if CfgKey.QUIET in TWIK_CFG:
+    set_print_quiet(TWIK_CFG[CfgKey.QUIET])
 
 
 def qprint(*args, **kwargs):

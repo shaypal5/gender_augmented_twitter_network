@@ -5,7 +5,6 @@ import re
 import gzip
 
 from twikwak17.shared import (
-    set_print_quiet,
     qprint,
     DEF_FNAME_PATTERN,
     DEF_FNAMES,
@@ -15,7 +14,7 @@ from twikwak17.shared import (
 
 
 def sample_twitter7_file(
-        num_tweets, source_fpath=None, target_fpath=None, quiet=False):
+        num_tweets, source_fpath=None, target_fpath=None):
     """Generates a sample of a twitter7 file (usefull for pipeline testing).
 
     Parameters
@@ -30,10 +29,7 @@ def sample_twitter7_file(
         The full path to the target file into which to write the sample.
         If not given, a file named `twitter7_sample.txt.gz` is created in the
         directory of the source file used.
-    quiet : boolean, default False
-        Is set to True, all messages are silenced.
     """
-    set_print_quiet(quiet)
     if source_fpath is None:
         source_fpath = os.path.join(twitter7_dpath(), DEF_FNAMES[0])
     else:
@@ -52,7 +48,7 @@ def sample_twitter7_file(
 
 
 def sample_twitter7_folder(
-        num_tweets, source_dpath=None, target_dpath=None, quiet=False):
+        num_tweets, source_dpath=None, target_dpath=None):
     """Generates a sample of a twitter7 folder (usefull for pipeline testing).
 
     Parameters
@@ -66,10 +62,7 @@ def sample_twitter7_folder(
         The full path to the target folder into which to write the samples.
         If not given, a subfolder named 'sample_files' is created inside the
         source folder.
-    quiet : boolean, default False
-        Is set to True, all messages are silenced.
     """
-    set_print_quiet(quiet)
     if source_dpath is None:
         source_dpath = twitter7_dpath()
     if target_dpath is None:
@@ -89,5 +82,4 @@ def sample_twitter7_folder(
             num_tweets=num_tweets,
             source_fpath=os.path.join(source_dpath, fname),
             target_fpath=os.path.join(target_dpath, sample_fname),
-            quiet=quiet,
         )

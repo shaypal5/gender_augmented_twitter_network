@@ -10,10 +10,8 @@ from ezenum import StringEnum
 from sortedcontainers import SortedDict
 
 from twikwak17.shared import (
-    set_print_quiet,
     qprint,
     DEF_FNAME_PATTERN,
-    DEF_FNAMES,
     twitter7_dpath,
     sample_output_dpath_by_twitter7_dpath,
 )
@@ -144,20 +142,20 @@ def merge_user_tweets_in_file(
         _report()
 
 
-def phase1(source_dpath, quiet=None):
+def phase1(tpath, output_dpath):
     """Splits a raw twitter7 tweets file into user-merged subset files.
 
     Parameters
     ----------
-    source_dpath : str
-        The full qualified path to the twitter7 folder to process.
-    quiet : boolean, default False
-        Is set to True, all messages are silenced.
+    tpath : str
+        The path to the twitter7 dataset folder. If not given, the value keyed
+        to 'twitter7_dpath' is looked up in the twikwak17 configuration file.
+    output_dpath : str
+        The path to the designated output folder.
     """
-    set_print_quiet(quiet)
-    if source_dpath is None:
-        source_dpath = twitter7_dpath()
-    os.makedirs(target_dpath, exist_ok=True)
+    if tpath is None:
+        tpath = twitter7_dpath()
+    os.makedirs(output_dpath, exist_ok=True)
     qprint((
         "Generating a sample of {} tweets per file from {},"
         " writing sample files to {}").format(

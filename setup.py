@@ -8,7 +8,8 @@ import versioneer
 
 
 INSTALL_REQUIRES = [
-	'click',
+    'psutil',
+    'click',
     'birch>=0.0.13',
     'sortedcontainers>=2.0',
     'ezenum>=0.0.3',

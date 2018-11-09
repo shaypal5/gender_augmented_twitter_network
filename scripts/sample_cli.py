@@ -28,6 +28,7 @@ SAMPLE_FILE_DOC = "Generate a sample of a twitter7 file."
 @SILENT
 def sample_file(size, source, target, quiet):
     """{}""".format(SAMPLE_FILE_DOC)
+    twikwak17.shared.set_print_quiet(quiet)
     twikwak17.sample_twitter7_file(size, source, target, quiet)
 
 
@@ -47,4 +48,5 @@ SAMPLE_DOC = "Generate a sample of the twitter7 dataset."
 @SILENT
 def sample_folder(size, tpath, output, quiet):
     """{}""".format(SAMPLE_DOC)
+    twikwak17.shared.set_print_quiet(quiet)
     twikwak17.sample_twitter7_folder(size, tpath, output, quiet)
