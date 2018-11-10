@@ -69,6 +69,13 @@ def phase_output_dpath(phase_ix, output_dpath):
     return dpath
 
 
+USER_LIST_FNAME = 'twitter7_user_list.json'
+
+
+def user_list_fpath_by_dpath(dpath):
+    return os.path.join(dpath, USER_LIST_FNAME)
+
+
 # === printing ===
 
 QUIET = False

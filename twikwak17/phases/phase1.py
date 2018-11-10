@@ -6,6 +6,7 @@ import gzip
 import json
 from psutil import virtual_memory
 from time import time
+from contextlib import ExitStack
 
 from ezenum import StringEnum
 from sortedcontainers import SortedDict
@@ -14,6 +15,7 @@ from twikwak17.shared import (
     qprint,
     DEF_FNAME_PATTERN,
     twitter7_dpath,
+    user_list_fpath_by_dpath,
 )
 
 
@@ -55,6 +57,8 @@ REPORT_TEMPLATE = (
     '{:.2f} min running | {} lines processed | ~ {} tweets processed |'
     ' {} tpm | {} files written | {} available memory'
 )
+DUMP_FNAME_MARKER = 'p1dump'
+USR_FNAME_MARKER = 'p1usr'
 
 
 def merge_user_tweets_in_file(
@@ -107,10 +111,10 @@ def merge_user_tweets_in_file(
         nonlocal usr_2_twits_str, files_written
         fname = os.path.split(fpath)[1]
         fname = fname[:fname.find('.')]
-        dump_fpath = '{}/{}_p1dump_{}.txt.gz'.format(
-            output_dpath, fname, files_written)
-        usr_fpath = '{}/{}_p1usr_{}.json'.format(
-            output_dpath, fname, files_written)
+        dump_fpath = '{}/{}_{}_{}.txt.gz'.format(
+            output_dpath, fname, DUMP_FNAME_MARKER, files_written)
+        usr_fpath = '{}/{}_{}_{}.json'.format(
+            output_dpath, fname, USR_FNAME_MARKER, files_written)
         dump_usr_2_twits_str_to_file(
             usr_2_twits_str=usr_2_twits_str,
             tweets_fpath=dump_fpath,
@@ -144,6 +148,45 @@ def merge_user_tweets_in_file(
         _report()
 
 
+USR_FNAME_RGX = '[\w\d_\-]+{}[\w\d_\.]+'.format(USR_FNAME_MARKER)
+
+
+def merge_user_files(dpath):
+    qprint("Starting to merge all twitter7 user lists in {}".format(dpath))
+    all_users = []
+    for fname in os.listdir(dpath):
+        if not re.match(pattern=USR_FNAME_RGX, string=fname):
+            continue
+        fpath = os.path.join(dpath, fname)
+        qprint("Reading users in {}".format(fname))
+        with open(fpath, 'r') as jfile:
+            all_users.extend(json.load(jfile))
+    output_fpath = user_list_fpath_by_dpath(dpath)
+    with open(output_fpath, 'w+') as ufile:
+        json.dump(fp=ufile, obj=all_users)
+    qprint("{} twitter7 users dumped into {}".format(
+        len(all_users), output_fpath))
+
+
+DUMP_FNAME_RGX = '[\w\d_\-]+{}[\w\d_\.]+'.format(DUMP_FNAME_MARKER)
+
+
+def merge_dump_files(dpath):
+    qprint("Starting to merge all twitter7 tweet dumps in {}".format(dpath))
+    filenames = [
+        os.path.join(dpath, fname) for fname in os.listdir(dpath)
+        if re.match(pattern=USR_FNAME_RGX, string=fname)
+    ]
+    with ExitStack() as stack:
+        files = [stack.enter_context(open(i, "r")) for i in filenames]
+        for rows in zip(*files):
+            # rows is now a tuple containing one row from each file
+            pass
+    # output_fpath = user_list_fpath_by_dpath(dpath)
+    # with open(output_fpath, 'w+') as ufile:
+        # json.dump(fp=ufile, obj=all_users)
+
+
 def phase1(output_dpath, tpath=None):
     """Splits a raw twitter7 tweets file into user-merged subset files.
 
@@ -167,3 +210,4 @@ def phase1(output_dpath, tpath=None):
             fpath=os.path.join(tpath, fname),
             output_dpath=output_dpath,
         )
+    merge_user_files(output_dpath)
