@@ -58,7 +58,7 @@ REPORT_TEMPLATE = (
 
 
 def merge_user_tweets_in_file(
-        fpath, monitor_line_freq=None, min_mem_mb=None):
+        fpath, output_dpath, monitor_line_freq=None, min_mem_mb=None):
     """Splits a raw twitter7 tweets file into user-merged subset files.
 
     The user order in each resulting file is lexicographical.
@@ -67,6 +67,8 @@ def merge_user_tweets_in_file(
     ----------
     fpath : str
         The full qualified path to the twitter7 file to process.
+    output_dpath : str
+        The path to the designated output folder.
     monitor_line_freq : int, optional
         Monitoring messages will be printed every this number of lines.
     min_mem_mb : int, optional
@@ -79,7 +81,7 @@ def merge_user_tweets_in_file(
         min_mem_mb = MIN_AVAIL_MEM_MB_DEF
     min_mem_bytes = min_mem_mb * BYTES_IN_MB
     qprint((
-        "Merging tweets by user in {}."
+        "Merging tweets by user in {}. "
         "\nMonitor line frequency is {} and min allowed memory (MB) is {}."
     ).format(fpath, monitor_line_freq, min_mem_mb))
     most_recent_user = None
@@ -103,10 +105,12 @@ def merge_user_tweets_in_file(
 
     def _dump_file():
         nonlocal usr_2_twits_str, files_written
-        dump_fpath = '{}_p1dump_{}.txt.gz'.format(
-            fpath[:fpath.find('.')], files_written)
-        usr_fpath = '{}_p1usr_{}.json'.format(
-            fpath[:fpath.find('.')], files_written)
+        fname = os.path.split(fpath)[1]
+        fname = fname[:fname.find('.')]
+        dump_fpath = '{}/{}_p1dump_{}.txt.gz'.format(
+            output_dpath, fname, files_written)
+        usr_fpath = '{}/{}_p1usr_{}.json'.format(
+            output_dpath, fname, files_written)
         dump_usr_2_twits_str_to_file(
             usr_2_twits_str=usr_2_twits_str,
             tweets_fpath=dump_fpath,
@@ -114,10 +118,8 @@ def merge_user_tweets_in_file(
         )
         files_written += 1
         usr_2_twits_str = SortedDict()
-        # qprint('Tweets dumped for the {}-th time into {}'.format(
-        #     files_written, dump_fpath))
-        # qprint('Tweets dumped for the {}-th time into {}'.format(
-        #     files_written, dump_fpath))
+        qprint('Tweets dumped for the {}-th time into {}'.format(
+            files_written, dump_fpath))
 
     with gzip.open(fpath, 'rt') as textf:
         for i, line in enumerate(textf):
@@ -163,4 +165,5 @@ def phase1(output_dpath, tpath=None):
             continue
         merge_user_tweets_in_file(
             fpath=os.path.join(tpath, fname),
+            output_dpath=output_dpath,
         )

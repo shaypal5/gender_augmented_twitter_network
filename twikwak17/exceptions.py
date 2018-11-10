@@ -6,7 +6,7 @@ class TwikwakConfigurationError(Exception):
 
     MISSING_VAL_TEMP = (
         "Missing configuration value for {}. Either provide it through the CLI"
-        " call or configure it at {} .")
+        " call or configure it in {} .")
 
     def __init__(self, cfg_key, cfg_fpath):
         msg = TwikwakConfigurationError.MISSING_VAL_TEMP.format(
