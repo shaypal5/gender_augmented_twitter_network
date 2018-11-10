@@ -4,6 +4,8 @@ import os
 
 from birch import Birch
 
+from .exceptions import TwikwakConfigurationError
+
 
 # === configuration ===
 
@@ -19,7 +21,16 @@ class CfgKey(object):
     OUTPUT_DPATH = 'output_dpath'
 
 
-DEF_FNAME_PATTERN = 'tweets2009-\d+.txt.gz'
+def error_raising_cfg_val_get(input_val, cfg_key):
+    if input_val is not None:
+        return input_val
+    try:
+        return TWIK_CFG[cfg_key]
+    except KeyError:
+        raise TwikwakConfigurationError(cfg_key, TWIK_CFG_FPATH)
+
+
+DEF_FNAME_PATTERN = 'tweets2009-[\w\d_]+.txt.gz'
 DEF_FNAME_TEMPLATE = 'tweets2009-{:02d}.txt.gz'
 DEF_FNAMES = [
     DEF_FNAME_TEMPLATE.format(month)

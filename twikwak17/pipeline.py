@@ -4,20 +4,11 @@ from .phases import (
     phase1,
 )
 from .shared import (
-    TWIK_CFG,
-    TWIK_CFG_FPATH,
     CfgKey,
+    error_raising_cfg_val_get,
     phase_output_dpath,
     qprint,
 )
-from .exceptions import (
-    TwikwakConfigurationError,
-)
-
-
-MISSING_VAL_TEMP = (
-    "Missing configuration value for {}. Either provide it through the CLI "
-    "call or configure it at {}".format(TWIK_CFG_FPATH))
 
 
 def run_pipeline(tpath=None, kpath=None, output_dpath=None):
@@ -35,12 +26,9 @@ def run_pipeline(tpath=None, kpath=None, output_dpath=None):
         The path to the designated output folder. If not given, the value keyed
         to 'output_dpath' is looked up in the twikwak17 configuration file.
     """
-    if tpath is None:
-        try:
-            tpath = TWIK_CFG[CfgKey.TWITTER7_DPATH]
-        except KeyError:
-            raise TwikwakConfigurationError(MISSING_VAL_TEMP.format(
-                'twitter7_dpath'))
+    tpath = error_raising_cfg_val_get(tpath, CfgKey.TWITTER7_DPATH)
+    kpath = error_raising_cfg_val_get(kpath, CfgKey.KWAK10_DPATH)
+    output_dpath = error_raising_cfg_val_get(output_dpath, CfgKey.OUTPUT_DPATH)
     qprint((
         "Starting to run the entire twikwak17 dataset generation pipeline."
         "\nPath to twitter7 dataset folder: {}\n"
@@ -48,4 +36,4 @@ def run_pipeline(tpath=None, kpath=None, output_dpath=None):
         "Path to output folder: {}"
     ).format(tpath, kpath, output_dpath))
     phase1_out_dpath = phase_output_dpath(1, output_dpath)
-    # phase1(tpath, output_dpath)
+    phase1(output_dpath=phase1_out_dpath, tpath=tpath)
