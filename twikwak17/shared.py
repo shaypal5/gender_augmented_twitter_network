@@ -69,11 +69,20 @@ def phase_output_dpath(phase_ix, output_dpath):
     return dpath
 
 
+# --- phase 1 ----
+
 USER_LIST_FNAME = 'twitter7_user_list.json'
 
 
 def user_list_fpath_by_dpath(dpath):
     return os.path.join(dpath, USER_LIST_FNAME)
+
+
+TWEET_LIST_FNAME = 'twitter7_tweet_list.txt.gz'
+
+
+def tweet_list_fpath_by_dpath(dpath):
+    return os.path.join(dpath, TWEET_LIST_FNAME)
 
 
 # === printing ===

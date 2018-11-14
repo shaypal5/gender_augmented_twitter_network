@@ -30,6 +30,7 @@ def run_pipeline(tpath=None, kpath=None, output_dpath=None):
     kpath = error_raising_cfg_val_get(kpath, CfgKey.KWAK10_DPATH)
     output_dpath = error_raising_cfg_val_get(output_dpath, CfgKey.OUTPUT_DPATH)
     qprint((
+        "\n\n######## twikwak17 ######## \n\n"
         "Starting to run the entire twikwak17 dataset generation pipeline."
         "\nPath to twitter7 dataset folder: {}\n"
         "Path to kwak10www dataset folder: {}\n"

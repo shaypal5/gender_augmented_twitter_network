@@ -16,6 +16,7 @@ from twikwak17.shared import (
     DEF_FNAME_PATTERN,
     twitter7_dpath,
     user_list_fpath_by_dpath,
+    tweet_list_fpath_by_dpath,
 )
 
 
@@ -85,7 +86,7 @@ def merge_user_tweets_in_file(
         min_mem_mb = MIN_AVAIL_MEM_MB_DEF
     min_mem_bytes = min_mem_mb * BYTES_IN_MB
     qprint((
-        "Merging tweets by user in {}. "
+        "\n\nMerging tweets by user in {}. "
         "\nMonitor line frequency is {} and min allowed memory (MB) is {}."
     ).format(fpath, monitor_line_freq, min_mem_mb))
     most_recent_user = None
@@ -122,7 +123,7 @@ def merge_user_tweets_in_file(
         )
         files_written += 1
         usr_2_twits_str = SortedDict()
-        qprint('Tweets dumped for the {}-th time into {}'.format(
+        qprint('\nTweets dumped for the {}-th time into {}'.format(
             files_written, dump_fpath))
 
     with gzip.open(fpath, 'rt') as textf:
@@ -168,23 +169,56 @@ def merge_user_files(dpath):
         len(all_users), output_fpath))
 
 
+def _uname_and_tweets_from_line(line):
+    ix = line.find(' ')
+    return line[0:ix], line[ix+1:]
+
+
 DUMP_FNAME_RGX = '[\w\d_\-]+{}[\w\d_\.]+'.format(DUMP_FNAME_MARKER)
 
 
 def merge_dump_files(dpath):
-    qprint("Starting to merge all twitter7 tweet dumps in {}".format(dpath))
-    filenames = [
+    qprint("\nStarting to merge all twitter7 tweet dumps in {}".format(dpath))
+    filepaths = [
         os.path.join(dpath, fname) for fname in os.listdir(dpath)
-        if re.match(pattern=USR_FNAME_RGX, string=fname)
+        if re.match(pattern=DUMP_FNAME_RGX, string=fname)
     ]
+    qprint("Files to merge: {}".format(filepaths))
+    output_fpath = tweet_list_fpath_by_dpath(dpath)
+    user_count = 0
     with ExitStack() as stack:
-        files = [stack.enter_context(open(i, "r")) for i in filenames]
-        for rows in zip(*files):
-            # rows is now a tuple containing one row from each file
-            pass
-    # output_fpath = user_list_fpath_by_dpath(dpath)
-    # with open(output_fpath, 'w+') as ufile:
-        # json.dump(fp=ufile, obj=all_users)
+        files = [stack.enter_context(gzip.open(fp, 'rt')) for fp in filepaths]
+        outfile = stack.enter_context(gzip.open(output_fpath, 'wt'))
+        current_lines = [f.readline() for f in files]
+        current_users, current_tweets = list(zip(list(
+            _uname_and_tweets_from_line(line)
+            for line in current_lines
+        )))
+
+        def _get_min_user_indices():
+            min_user = min(current_users)
+            return [
+                i for i in range(len(current_users))
+                if current_users[i] == min_user
+            ]
+
+        def _increment_pointer(i):
+            line = files[i].readline()
+            current_lines[i] = line
+            current_users[i], current_tweets[i] = _uname_and_tweets_from_line(
+                line)
+
+        min_user = None
+        while any(current_lines):
+            min_ixs = _get_min_user_indices()
+            min_user = current_users[min_ixs[0]]
+            min_tweets_sets = [current_lines[i] for i in min_ixs]
+            min_user_tweets = ' '.join(min_tweets_sets)
+            outfile.write('{} {}\n'.format(min_user, min_user_tweets))
+            for i in min_ixs:
+                _increment_pointer(i)
+            user_count += 1
+    qprint("Finished merging tweet files. {} users found.".format(user_count))
 
 
 def phase1(output_dpath, tpath=None):
@@ -201,8 +235,10 @@ def phase1(output_dpath, tpath=None):
     if tpath is None:
         tpath = twitter7_dpath()
     os.makedirs(output_dpath, exist_ok=True)
+    qprint("\n\n====== PHASE 1 =====")
     qprint("Starting phase 1 from {} input dir to {} output dir.".format(
             tpath, output_dpath))
+    qprint("\n\n---- 1.1 ----\nUser-wise merging per-file...")
     for fname in os.listdir(tpath):
         if not re.match(pattern=DEF_FNAME_PATTERN, string=fname):
             continue
@@ -210,4 +246,7 @@ def phase1(output_dpath, tpath=None):
             fpath=os.path.join(tpath, fname),
             output_dpath=output_dpath,
         )
+    qprint("\n\n---- 1.2 ----\nMerging user files...")
     merge_user_files(output_dpath)
+    qprint("\n\n---- 1.2 ----\nMerging tweet files...")
+    merge_dump_files(output_dpath)
