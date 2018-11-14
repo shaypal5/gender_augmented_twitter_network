@@ -162,6 +162,7 @@ def merge_user_files(dpath):
         qprint("Reading users in {}".format(fname))
         with open(fpath, 'r') as jfile:
             all_users.extend(json.load(jfile))
+    all_users = list(set(all_users))
     output_fpath = user_list_fpath_by_dpath(dpath)
     with open(output_fpath, 'w+') as ufile:
         json.dump(fp=ufile, obj=all_users)
@@ -170,11 +171,14 @@ def merge_user_files(dpath):
 
 
 def _uname_and_tweets_from_line(line):
+    if len(line) < 1:
+        return '', ''
     ix = line.find(' ')
     return line[0:ix], line[ix+1:]
 
 
 DUMP_FNAME_RGX = '[\w\d_\-]+{}[\w\d_\.]+'.format(DUMP_FNAME_MARKER)
+DONE_MARKER = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'
 
 
 def merge_dump_files(dpath):
@@ -190,14 +194,12 @@ def merge_dump_files(dpath):
         files = [stack.enter_context(gzip.open(fp, 'rt')) for fp in filepaths]
         outfile = stack.enter_context(gzip.open(output_fpath, 'wt'))
         current_lines = [f.readline() for f in files]
-        print([
-            _uname_and_tweets_from_line(line)
-            for line in current_lines
-        ])
-        current_users, current_tweets = list(zip([
+        current_users, current_tweets = list(zip(*[
             _uname_and_tweets_from_line(line)
             for line in current_lines
         ]))
+        current_users = list(current_users)
+        current_tweets = list(current_tweets)
 
         def _get_min_user_indices():
             min_user = min(current_users)
@@ -208,6 +210,11 @@ def merge_dump_files(dpath):
 
         def _increment_pointer(i):
             line = files[i].readline()
+            if len(line) < 1:
+                current_lines[i] = DONE_MARKER
+                current_users[i] = DONE_MARKER
+                current_tweets[i] = DONE_MARKER
+                return
             current_lines[i] = line
             current_users[i], current_tweets[i] = _uname_and_tweets_from_line(
                 line)
@@ -216,9 +223,11 @@ def merge_dump_files(dpath):
         while any(current_lines):
             min_ixs = _get_min_user_indices()
             min_user = current_users[min_ixs[0]]
-            min_tweets_sets = [current_lines[i] for i in min_ixs]
+            if min_user == DONE_MARKER:
+                break
+            min_tweets_sets = [current_tweets[i] for i in min_ixs]
             min_user_tweets = ' '.join(min_tweets_sets)
-            outfile.write('{} {}\n'.format(min_user, min_user_tweets))
+            outfile.write('{} {}'.format(min_user, min_user_tweets))
             for i in min_ixs:
                 _increment_pointer(i)
             user_count += 1
