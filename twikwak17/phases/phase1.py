@@ -190,10 +190,14 @@ def merge_dump_files(dpath):
         files = [stack.enter_context(gzip.open(fp, 'rt')) for fp in filepaths]
         outfile = stack.enter_context(gzip.open(output_fpath, 'wt'))
         current_lines = [f.readline() for f in files]
-        current_users, current_tweets = list(zip(list(
+        print([
             _uname_and_tweets_from_line(line)
             for line in current_lines
-        )))
+        ])
+        current_users, current_tweets = list(zip([
+            _uname_and_tweets_from_line(line)
+            for line in current_lines
+        ]))
 
         def _get_min_user_indices():
             min_user = min(current_users)
