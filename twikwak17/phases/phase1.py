@@ -14,7 +14,7 @@ from twikwak17.shared import (
     qprint,
     DEF_TWITTER7_FNAME_PATTERN,
     twitter7_dpath,
-    user_list_fpath_by_dpath,
+    t7_user_list_fpath_by_dpath,
     tweet_list_fpath_by_dpath,
     seconds_to_duration_str,
 )
@@ -159,7 +159,7 @@ def merge_user_files(dpath):
         if re.match(pattern=USR_FNAME_RGX, string=fname)
     ]
     qprint("Found {} files to merge.".format(len(filepaths)))
-    output_fpath = user_list_fpath_by_dpath(dpath)
+    output_fpath = t7_user_list_fpath_by_dpath(dpath)
     user_count = 0
     with ExitStack() as stack:
         files = [stack.enter_context(gzip.open(fp, 'rt')) for fp in filepaths]

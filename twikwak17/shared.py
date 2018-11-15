@@ -79,7 +79,7 @@ def phase_output_dpath(phase_ix, output_dpath):
 USER_LIST_FNAME = 'twitter7_user_list.txt.gz'
 
 
-def user_list_fpath_by_dpath(dpath):
+def t7_user_list_fpath_by_dpath(dpath):
     return os.path.join(dpath, USER_LIST_FNAME)
 
 
