@@ -46,7 +46,7 @@ def run_pipeline(tpath=None, kpath=None, output_dpath=None):
     phase1(output_dpath=phase1_out_dpath, tpath=tpath)
 
     phase2_out_dpath = phase_output_dpath(2, output_dpath)
-    # phase2(output_dpath=phase2_out_dpath, kpath=kpath)
+    phase2(output_dpath=phase2_out_dpath, kpath=kpath)
 
     end = time.time()
     print((

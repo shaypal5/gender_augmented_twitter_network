@@ -43,8 +43,8 @@ def interpret_line(decoded_line):
 
 
 def dump_usr_2_twits_str_to_file(usr_2_twits_str, tweets_fpath, usr_fpath):
-    with gzip.open(tweets_fpath, 'wt') as tweets_f:
-        with gzip.open(usr_fpath, 'wt') as usr_f:
+    with gzip.open(tweets_fpath, 'wt+') as tweets_f:
+        with gzip.open(usr_fpath, 'wt+') as usr_f:
             for user, tweets in usr_2_twits_str.items():
                 tweets_f.write('{} {}\n'.format(user, tweets))
                 usr_f.write('{}\n'.format(user))
@@ -73,7 +73,7 @@ def merge_user_tweets_in_file(
     fpath : str
         The full qualified path to the twitter7 file to process.
     output_dpath : str
-     [MaÅ   The path to the designated output folder.
+        The path to the designated output folder.
     monitor_line_freq : int, optional
         Monitoring messages will be printed every this number of lines.
     min_mem_mb : int, optional

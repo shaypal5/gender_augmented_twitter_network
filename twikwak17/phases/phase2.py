@@ -3,7 +3,10 @@
 import os
 import re
 import time
-import json
+import gzip
+from psutil import virtual_memory
+
+from sortedcontainers import SortedDict
 
 from twikwak17.shared import (
     qprint,
@@ -16,6 +19,38 @@ from twikwak17.shared import (
 
 ULIST_FNAME = 'numeric2screen'
 LINE_REGEX = '([0-9]+) (.+)'
+BYTES_IN_MB = 1000000
+MIN_AVAIL_MEM_MB_DEF = 500
+USR_FNAME_MARKER = 'p2usr'
+
+
+def _dump_uname2id(uname_2_id, files_written, output_dpath):
+        dump_fpath = '{}/{}_{}.txt.gz'.format(
+            output_dpath, USR_FNAME_MARKER, files_written)
+        with gzip.open(dump_fpath, 'wt+') as f:
+            for uname, uid in uname_2_id.items():
+                f.write('{} {}\n'.format(uname, uid))
+
+
+def inverse_numeric2screen_into_multiple_files(output_dpath, kpath):
+    min_mem_bytes = MIN_AVAIL_MEM_MB_DEF * BYTES_IN_MB
+    files_written = 0
+    ulist_fpath = os.path.join(kpath, ULIST_FNAME)
+    uname_to_id = SortedDict()
+    i = 0
+    with open(ulist_fpath, 'rt') as f:
+        for line in f:
+            match_groups = re.match(LINE_REGEX, line).groups()
+            uid = match_groups[0]
+            uname = match_groups[1]
+            uname_to_id[uname] = uid
+            i += 1
+            if i % 10000 == 0:
+                print("{:,} lines read".format(i), end="\r")
+                av_mem = virtual_memory().available
+                if av_mem < min_mem_bytes:
+                    _dump_uname2id(uname_to_id, files_written, output_dpath)
+                    files_written += 1
 
 
 def phase2(output_dpath, kpath=None):
@@ -37,31 +72,16 @@ def phase2(output_dpath, kpath=None):
     qprint("Starting phase 2 from {} input dir to {} output dir.".format(
             kpath, output_dpath))
 
-    qprint("\n\n---- 2.1 ----\nReading list into memory...")
-    ulist_fpath = os.path.join(kpath, ULIST_FNAME)
-    uname_to_id = {}
-    i = 0
-    with open(ulist_fpath, 'rt') as f:
-        for line in f:
-            match_groups = re.match(LINE_REGEX, line).groups()
-            uid = match_groups[0]
-            uname = match_groups[1]
-            uname_to_id[uname] = uid
-            i += 1
-            if i % 10000 == 0:
-                print("{:,} lines read".format(i), end="\r")
+    qprint("\n\n---- 2.1 ----\nInverting numeric2screen into several files...")
+    inverse_numeric2screen_into_multiple_files(output_dpath, kpath)
 
     unames_fpath = kwak10_unames_fpath_by_kpath(kpath)
     qprint("\n\n---- 2.2 ----\nDumping user name list to {}...".format(
         unames_fpath))
-    with open(unames_fpath, 'w+') as f:
-        json.dump(sorted(uname_to_id.keys()), f)
 
     uname2id_fpath = uname2id_fpath_by_kpath(kpath)
     qprint("\n\n---- 2.2 ----\nDumping user-to-id map to {}...".format(
         uname2id_fpath))
-    with open(uname2id_fpath, 'w+') as f:
-        json.dump(sorted(uname_to_id, f))
 
     print("\n\n====== END-OF PHASE 2 ======")
     end = time.time()
