@@ -1,6 +1,7 @@
 """Shared stuff for twikwak17."""
 
 import os
+from datetime import datetime, timedelta
 
 from birch import Birch
 
@@ -30,16 +31,20 @@ def error_raising_cfg_val_get(input_val, cfg_key):
         raise TwikwakConfigurationError(cfg_key, TWIK_CFG_FPATH)
 
 
-DEF_FNAME_PATTERN = 'tweets2009-[\w\d_]+.txt.gz'
-DEF_FNAME_TEMPLATE = 'tweets2009-{:02d}.txt.gz'
-DEF_FNAMES = [
-    DEF_FNAME_TEMPLATE.format(month)
+DEF_TWITTER7_FNAME_PATTERN = 'tweets2009-[\w\d_]+.txt.gz'
+DEF_TWITTER7_FNAME_TEMPLATE = 'tweets2009-{:02d}.txt.gz'
+DEF_TWITTER7_FNAMES = [
+    DEF_TWITTER7_FNAME_TEMPLATE.format(month)
     for month in range(6, 13)
 ]
 
 
 def twitter7_dpath():
     return TWIK_CFG.get(CfgKey.TWITTER7_DPATH, None)
+
+
+def kwak10_dpath():
+    return TWIK_CFG.get(CfgKey.KWAK10_DPATH, None)
 
 
 DEF_SAMPLE_DNAME_TEMPLATE = 'sample_files'
@@ -111,3 +116,9 @@ def qprint(*args, **kwargs):
     """A print function that can be quieted."""
     if not QUIET:
         print(*args, **kwargs)
+
+
+def seconds_to_duration_str(duration_in_seconds):
+    sec = timedelta(seconds=duration_in_seconds)
+    d = datetime(1, 1, 1) + sec
+    return "{} days and {}:{}:{}".format(d.day-1, d.hour, d.minute, d.second)

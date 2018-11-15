@@ -4,8 +4,8 @@ import os
 import re
 import gzip
 import json
+import time
 from psutil import virtual_memory
-from time import time
 from contextlib import ExitStack
 
 from ezenum import StringEnum
@@ -13,10 +13,11 @@ from sortedcontainers import SortedDict
 
 from twikwak17.shared import (
     qprint,
-    DEF_FNAME_PATTERN,
+    DEF_TWITTER7_FNAME_PATTERN,
     twitter7_dpath,
     user_list_fpath_by_dpath,
     tweet_list_fpath_by_dpath,
+    seconds_to_duration_str,
 )
 
 
@@ -91,13 +92,13 @@ def merge_user_tweets_in_file(
     ).format(fpath, monitor_line_freq, min_mem_mb))
     most_recent_user = None
     # starting_available_mem = virtual_memory().available
-    start_time = time()
+    start_time = time.time()
     usr_2_twits_str = SortedDict()
     files_written = 0
 
     def _report():
         av_mem = virtual_memory().available
-        seconds_running = time() - start_time
+        seconds_running = time.time() - start_time
         report = REPORT_TEMPLATE.format(
             seconds_running / 60,
             i,
@@ -245,6 +246,7 @@ def phase1(output_dpath, tpath=None):
         The path to the twitter7 dataset folder. If not given, the value keyed
         to 'twitter7_dpath' is looked up in the twikwak17 configuration file.
     """
+    start = time.time()
     if tpath is None:
         tpath = twitter7_dpath()
     os.makedirs(output_dpath, exist_ok=True)
@@ -253,7 +255,7 @@ def phase1(output_dpath, tpath=None):
             tpath, output_dpath))
     qprint("\n\n---- 1.1 ----\nUser-wise merging per-file...")
     for fname in os.listdir(tpath):
-        if not re.match(pattern=DEF_FNAME_PATTERN, string=fname):
+        if not re.match(pattern=DEF_TWITTER7_FNAME_PATTERN, string=fname):
             continue
         merge_user_tweets_in_file(
             fpath=os.path.join(tpath, fname),
@@ -263,3 +265,9 @@ def phase1(output_dpath, tpath=None):
     merge_user_files(output_dpath)
     qprint("\n\n---- 1.2 ----\nMerging tweet files...")
     merge_dump_files(output_dpath)
+    qprint("\n\n====== END-OF PHASE 1 ======")
+    end = time.time()
+    print((
+        "Finished running phase 1 of the twikwak17 pipeline.\n"
+        "Run duration: {}".format(seconds_to_duration_str(end - start))
+    ))

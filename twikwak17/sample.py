@@ -6,8 +6,8 @@ import gzip
 
 from twikwak17.shared import (
     qprint,
-    DEF_FNAME_PATTERN,
-    DEF_FNAMES,
+    DEF_TWITTER7_FNAME_PATTERN,
+    DEF_TWITTER7_FNAMES,
     twitter7_dpath,
     sample_output_dpath_by_twitter7_dpath,
 )
@@ -31,7 +31,7 @@ def sample_twitter7_file(
         directory of the source file used.
     """
     if source_fpath is None:
-        source_fpath = os.path.join(twitter7_dpath(), DEF_FNAMES[0])
+        source_fpath = os.path.join(twitter7_dpath(), DEF_TWITTER7_FNAMES[0])
     else:
         source_dpath = os.path.dirname(source_fpath)
     if target_fpath is None:
@@ -74,7 +74,7 @@ def sample_twitter7_folder(
         " writing sample files to {}").format(
             num_tweets, source_dpath, target_dpath))
     for fname in os.listdir(source_dpath):
-        if not re.match(pattern=DEF_FNAME_PATTERN, string=fname):
+        if not re.match(pattern=DEF_TWITTER7_FNAME_PATTERN, string=fname):
             continue
         fname_no_ext = fname[:-7]  # assuming .txt.gz extension
         sample_fname = '{}_sample_{}.txt.gz'.format(fname_no_ext, num_tweets)
