@@ -76,7 +76,7 @@ def phase_output_dpath(phase_ix, output_dpath):
 
 # --- phase 1 ----
 
-USER_LIST_FNAME = 'twitter7_user_list.json'
+USER_LIST_FNAME = 'twitter7_user_list.txt.gz'
 
 
 def user_list_fpath_by_dpath(dpath):
@@ -88,6 +88,20 @@ TWEET_LIST_FNAME = 'twitter7_tweet_list.txt.gz'
 
 def tweet_list_fpath_by_dpath(dpath):
     return os.path.join(dpath, TWEET_LIST_FNAME)
+
+
+# --- phase 2 ----
+
+UNAME_2_ID_FNAME = 'kwak10_uname_to_id.txt.gz'
+KWAK10_UNAMES_FNAME = 'kwak10_unames.txt.gz'
+
+
+def uname2id_fpath_by_kpath(kpath):
+    return os.path.join(kpath, UNAME_2_ID_FNAME)
+
+
+def kwak10_unames_fpath_by_kpath(kpath):
+    return os.path.join(kpath, KWAK10_UNAMES_FNAME)
 
 
 # === printing ===

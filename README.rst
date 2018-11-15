@@ -59,7 +59,7 @@ The generation process is composed of several stages:
      
    The resulting format, where all tweets by a single user are concatenated into a single line, seperated by single whitespaces, matches the input format of a piece of code down the line in the process
   
-2. The second phase reads through the ``numeric2screen.tar.gz`` file of the *kwak10www* dataset and produces a lexicographically sorted handle-to-numeric-id mapping of the roughly 16.6 million users in this file (which amounts to about 40% of the users in the  *kwak10www* dataset).
+2. The second phase reads through the ``numeric2screen.tar.gz`` file of the *kwak10www* dataset and produces a lexicographically sorted handle-to-numeric-id mapping of the users in the dataset.
 
 3. The third stage merges the two sorted lists of user handles to create a lexicographically sorted list of the intersection between the two lists. It also creates two lists of the two `relative complements <https://en.wikipedia.org/wiki/Complement_(set_theory)#Relative_complement>`_ of each list in the other.
 

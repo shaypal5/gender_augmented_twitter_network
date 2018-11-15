@@ -3,7 +3,6 @@
 import os
 import re
 import gzip
-import json
 import time
 from psutil import virtual_memory
 from contextlib import ExitStack
@@ -44,11 +43,11 @@ def interpret_line(decoded_line):
 
 
 def dump_usr_2_twits_str_to_file(usr_2_twits_str, tweets_fpath, usr_fpath):
-    with gzip.open(tweets_fpath, 'wt') as f:
-        for user, tweets in usr_2_twits_str.items():
-            f.write('{} {}\n'.format(user, tweets))
-    with open(usr_fpath, 'w') as f:
-        json.dump(list(usr_2_twits_str.keys()), f)
+    with gzip.open(tweets_fpath, 'wt') as tweets_f:
+        with gzip.open(usr_fpath, 'wt') as usr_f:
+            for user, tweets in usr_2_twits_str.items():
+                tweets_f.write('{} {}\n'.format(user, tweets))
+                usr_f.write('{}\n'.format(user))
 
 
 NO_CONTENT_STR = 'No Post Title'
@@ -74,7 +73,7 @@ def merge_user_tweets_in_file(
     fpath : str
         The full qualified path to the twitter7 file to process.
     output_dpath : str
-        The path to the designated output folder.
+     [MaÅ   The path to the designated output folder.
     monitor_line_freq : int, optional
         Monitoring messages will be printed every this number of lines.
     min_mem_mb : int, optional
@@ -115,7 +114,7 @@ def merge_user_tweets_in_file(
         fname = fname[:fname.find('.')]
         dump_fpath = '{}/{}_{}_{}.txt.gz'.format(
             output_dpath, fname, DUMP_FNAME_MARKER, files_written)
-        usr_fpath = '{}/{}_{}_{}.json'.format(
+        usr_fpath = '{}/{}_{}_{}.txt.gz'.format(
             output_dpath, fname, USR_FNAME_MARKER, files_written)
         dump_usr_2_twits_str_to_file(
             usr_2_twits_str=usr_2_twits_str,
@@ -155,20 +154,44 @@ USR_FNAME_RGX = '[\w\d_\-]+{}[\w\d_\.]+'.format(USR_FNAME_MARKER)
 
 def merge_user_files(dpath):
     qprint("Starting to merge all twitter7 user lists in {}".format(dpath))
-    all_users = []
-    for fname in os.listdir(dpath):
-        if not re.match(pattern=USR_FNAME_RGX, string=fname):
-            continue
-        fpath = os.path.join(dpath, fname)
-        qprint("Reading users in {}".format(fname))
-        with open(fpath, 'r') as jfile:
-            all_users.extend(json.load(jfile))
-    all_users = list(set(all_users))
+    filepaths = [
+        os.path.join(dpath, fname) for fname in os.listdir(dpath)
+        if re.match(pattern=USR_FNAME_RGX, string=fname)
+    ]
+    qprint("Found {} files to merge.".format(len(filepaths)))
     output_fpath = user_list_fpath_by_dpath(dpath)
-    with open(output_fpath, 'w+') as ufile:
-        json.dump(fp=ufile, obj=all_users)
+    user_count = 0
+    with ExitStack() as stack:
+        files = [stack.enter_context(gzip.open(fp, 'rt')) for fp in filepaths]
+        outfile = stack.enter_context(gzip.open(output_fpath, 'wt'))
+        current_lines = [f.readline() for f in files]
+        min_user = None
+
+        def _get_min_user_and_indices():
+            min_user = min(current_lines)
+            return min_user, [
+                i for i in range(len(current_lines))
+                if current_lines[i] == min_user
+            ]
+
+        def _increment_pointer(i):
+            line = files[i].readline()
+            if len(line) < 1:
+                current_lines[i] = DONE_MARKER
+                return
+            current_lines[i] = line
+
+        while any(current_lines):
+            min_user, min_ixs = _get_min_user_and_indices()
+            if min_user == DONE_MARKER:
+                break
+            # no need for a linebreak here; already here
+            outfile.write('{}'.format(min_user))
+            for i in min_ixs:
+                _increment_pointer(i)
+            user_count += 1
     qprint("{} twitter7 users dumped into {}".format(
-        len(all_users), output_fpath))
+        user_count, output_fpath))
 
 
 def _uname_and_tweets_from_line(line):
@@ -188,7 +211,7 @@ def merge_dump_files(dpath):
         os.path.join(dpath, fname) for fname in os.listdir(dpath)
         if re.match(pattern=DUMP_FNAME_RGX, string=fname)
     ]
-    qprint("Files to merge: {}".format(filepaths))
+    qprint("Found {} files to merge.".format(len(filepaths)))
     output_fpath = tweet_list_fpath_by_dpath(dpath)
     user_count = 0
     with ExitStack() as stack:
@@ -202,9 +225,9 @@ def merge_dump_files(dpath):
         current_users = list(current_users)
         current_tweets = list(current_tweets)
 
-        def _get_min_user_indices():
+        def _get_min_user_and_indices():
             min_user = min(current_users)
-            return [
+            return min_user, [
                 i for i in range(len(current_users))
                 if current_users[i] == min_user
             ]
@@ -222,13 +245,13 @@ def merge_dump_files(dpath):
 
         min_user = None
         while any(current_lines):
-            min_ixs = _get_min_user_indices()
-            min_user = current_users[min_ixs[0]]
+            min_user, min_ixs = _get_min_user_and_indices()
             if min_user == DONE_MARKER:
                 break
             min_tweets_sets = [current_tweets[i] for i in min_ixs]
             min_user_tweets = ' '.join(min_tweets_sets)
-            outfile.write('{} {}'.format(min_user, min_user_tweets))
+            min_user_tweets = min_user_tweets.replace('\n', ' ')
+            outfile.write('{} {}\n'.format(min_user, min_user_tweets))
             for i in min_ixs:
                 _increment_pointer(i)
             user_count += 1
