@@ -11,6 +11,7 @@ from ezenum import StringEnum
 from sortedcontainers import SortedDict
 
 from twikwak17.shared import (
+    DONE_MARKER,
     qprint,
     DEF_TWITTER7_FNAME_PATTERN,
     twitter7_dpath,
@@ -202,7 +203,6 @@ def _uname_and_tweets_from_line(line):
 
 
 DUMP_FNAME_RGX = '[\w\d_\-]+{}[\w\d_\.]+'.format(DUMP_FNAME_MARKER)
-DONE_MARKER = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'
 
 
 def merge_dump_files(dpath):
@@ -258,7 +258,7 @@ def merge_dump_files(dpath):
     qprint("Finished merging tweet files. {} users found.".format(user_count))
 
 
-def phase1(output_dpath, tpath=None):
+def phase1(output_dpath, tpath=None, subphases=None):
     """Splits a raw twitter7 tweets file into user-merged subset files.
 
     Parameters
@@ -268,6 +268,8 @@ def phase1(output_dpath, tpath=None):
     tpath : str, optional
         The path to the twitter7 dataset folder. If not given, the value keyed
         to 'twitter7_dpath' is looked up in the twikwak17 configuration file.
+    subphases : list of str, optional
+        If given, only subphases matching given strings are ran. E.g. '2.1'.
     """
     start = time.time()
     if tpath is None:
@@ -276,18 +278,25 @@ def phase1(output_dpath, tpath=None):
     qprint("\n\n====== PHASE 1 =====")
     qprint("Starting phase 1 from {} input dir to {} output dir.".format(
             tpath, output_dpath))
-    qprint("\n\n---- 1.1 ----\nUser-wise merging per-file...")
-    for fname in os.listdir(tpath):
-        if not re.match(pattern=DEF_TWITTER7_FNAME_PATTERN, string=fname):
-            continue
-        merge_user_tweets_in_file(
-            fpath=os.path.join(tpath, fname),
-            output_dpath=output_dpath,
-        )
-    qprint("\n\n---- 1.2 ----\nMerging user files...")
-    merge_user_files(output_dpath)
-    qprint("\n\n---- 1.2 ----\nMerging tweet files...")
-    merge_dump_files(output_dpath)
+
+    if (subphases is None) or ('1.1' in subphases):
+        qprint("\n\n---- 1.1 ----\nUser-wise merging per-file...")
+        for fname in os.listdir(tpath):
+            if not re.match(pattern=DEF_TWITTER7_FNAME_PATTERN, string=fname):
+                continue
+            merge_user_tweets_in_file(
+                fpath=os.path.join(tpath, fname),
+                output_dpath=output_dpath,
+            )
+
+    if (subphases is None) or ('1.2' in subphases):
+        qprint("\n\n---- 1.2 ----\nMerging user files...")
+        merge_user_files(output_dpath)
+
+    if (subphases is None) or ('1.3' in subphases):
+        qprint("\n\n---- 1.3 ----\nMerging tweet files...")
+        merge_dump_files(output_dpath)
+
     qprint("\n\n====== END-OF PHASE 1 ======")
     end = time.time()
     print((

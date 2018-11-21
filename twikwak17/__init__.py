@@ -4,6 +4,7 @@ from .sample import (  # noqa: F401
 )
 from .pipeline import (  # noqa: F401
     run_pipeline,
+    run_phases,
 )
 
 from ._version import get_versions

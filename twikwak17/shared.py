@@ -8,6 +8,11 @@ from birch import Birch
 from .exceptions import TwikwakConfigurationError
 
 
+# === general ===
+
+DONE_MARKER = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'
+
+
 # === configuration ===
 
 TWIK_CFG = Birch('twikwak17')
@@ -96,12 +101,12 @@ UNAME_2_ID_FNAME = 'kwak10_uname_to_id.txt.gz'
 KWAK10_UNAMES_FNAME = 'kwak10_unames.txt.gz'
 
 
-def uname2id_fpath_by_kpath(kpath):
-    return os.path.join(kpath, UNAME_2_ID_FNAME)
+def uname2id_fpath_by_dpath(dpath):
+    return os.path.join(dpath, UNAME_2_ID_FNAME)
 
 
-def kwak10_unames_fpath_by_kpath(kpath):
-    return os.path.join(kpath, KWAK10_UNAMES_FNAME)
+def kwak10_unames_fpath_by_dpath(dpath):
+    return os.path.join(dpath, KWAK10_UNAMES_FNAME)
 
 
 # === printing ===

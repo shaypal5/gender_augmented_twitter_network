@@ -58,8 +58,20 @@ The generation process is composed of several stages:
      britishcoala i like donuts have you seen the game yesterday ... i'm closing my tweeter account !
      
    The resulting format, where all tweets by a single user are concatenated into a single line, seperated by single whitespaces, matches the input format of a piece of code down the line in the process
+
+   The sub-phases for this phase are:
+
+   1.1. Reading through the 7 tweets file in order, loading tweets into user-to-tweets in-memory map (merging indvidual tweets by the same user); this map is offloaded to disk whenever memory is closed to be full. In each such offloading, the
+
+  1.2. Merge-sorting the sorted username files into a single sorted username list file named ``twitter7_user_list.txt.gz``.
+
+  1.2. Merge-sorting the sorted username-to-tweets files into a single sorted username-to-tweets file named ``twitter7_tweet_list.txt.gz``.
   
 2. The second phase reads through the ``numeric2screen.tar.gz`` file of the *kwak10www* dataset and produces a lexicographically sorted handle-to-numeric-id mapping of the users in the dataset.
+
+   2.1. Inverting ``numeric2screen`` into several lexicographically sorted username-to-id list files.
+
+   2.2. Sort-merging the sorted username-to-id files into a single sorted username-to-id file named ``kwak10_uname_to_id.txt.gz`` and a single sorted username list named ``kwak10_unames.txt.gz``.
 
 3. The third stage merges the two sorted lists of user handles to create a lexicographically sorted list of the intersection between the two lists. It also creates two lists of the two `relative complements <https://en.wikipedia.org/wiki/Complement_(set_theory)#Relative_complement>`_ of each list in the other.
 
