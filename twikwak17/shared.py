@@ -109,6 +109,15 @@ def kwak10_unames_fpath_by_dpath(dpath):
     return os.path.join(dpath, KWAK10_UNAMES_FNAME)
 
 
+# --- phase 3 ---
+
+UNAME_INTERSECTION_FNAME = 'uname_intersection.txt.gz'
+
+
+def uname_intersection_fpath_by_dpath(dpath):
+    return os.path.join(dpath, UNAME_INTERSECTION_FNAME)
+
+
 # === printing ===
 
 QUIET = False
