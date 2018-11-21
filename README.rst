@@ -63,9 +63,9 @@ The generation process is composed of several stages:
 
    1.1. Reading through the 7 tweets file in order, loading tweets into user-to-tweets in-memory map (merging indvidual tweets by the same user); this map is offloaded to disk whenever memory is closed to be full. In each such offloading, the
 
-  1.2. Merge-sorting the sorted username files into a single sorted username list file named ``twitter7_user_list.txt.gz``.
+   1.2. Merge-sorting the sorted username files into a single sorted username list file named ``twitter7_user_list.txt.gz``.
 
-  1.2. Merge-sorting the sorted username-to-tweets files into a single sorted username-to-tweets file named ``twitter7_tweet_list.txt.gz``.
+   1.3. Merge-sorting the sorted username-to-tweets files into a single sorted username-to-tweets file named ``twitter7_tweet_list.txt.gz``.
   
 2. The second phase reads through the ``numeric2screen.tar.gz`` file of the *kwak10www* dataset and produces a lexicographically sorted handle-to-numeric-id mapping of the users in the dataset.
 
