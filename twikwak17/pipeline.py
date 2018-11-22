@@ -6,6 +6,7 @@ import time
 from .phases import (
     phase1,
     phase2,
+    phase3,
 )
 from .shared import (
     CfgKey,
@@ -48,6 +49,13 @@ def run_pipeline(tpath=None, kpath=None, output_dpath=None):
 
     phase2_out_dpath = phase_output_dpath(2, output_dpath)
     phase2(output_dpath=phase2_out_dpath, kpath=kpath)
+
+    phase3_out_dpath = phase_output_dpath(3, output_dpath)
+    phase3(
+        phase1_output_dpath=phase1_out_dpath,
+        phase2_output_dpath=phase2_out_dpath,
+        phase3_output_dpath=phase3_out_dpath,
+    )
 
     end = time.time()
     print((
@@ -103,6 +111,14 @@ def run_phases(phases, tpath=None, kpath=None, output_dpath=None):
         if len(two_subphases) > 0:
             phase2(output_dpath=phase2_out_dpath, kpath=kpath,
                    subphases=two_subphases)
+
+    phase3_out_dpath = phase_output_dpath(3, output_dpath)
+    if '3' in phases:
+        phase3(
+            phase1_output_dpath=phase1_out_dpath,
+            phase2_output_dpath=phase2_out_dpath,
+            phase3_output_dpath=phase3_out_dpath,
+        )
 
     end = time.time()
     print((

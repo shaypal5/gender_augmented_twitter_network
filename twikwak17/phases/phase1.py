@@ -56,8 +56,8 @@ MONITOR_LINE_FREQ_DEF = 1000000
 BYTES_IN_MB = 1000000
 MIN_AVAIL_MEM_MB_DEF = 500
 REPORT_TEMPLATE = (
-    '{:.2f} min running | {} lines processed | ~ {} tweets processed |'
-    ' {} tpm | {} files written | {} available memory'
+    '{:.2f} min running | {:,} lines processed | ~ {:,} tweets processed |'
+    ' {:,} tpm | {} files written | {:,} available memory [b]'
 )
 DUMP_FNAME_MARKER = 'p1dump'
 USR_FNAME_MARKER = 'p1usr'
