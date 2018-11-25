@@ -16,7 +16,8 @@ DONE_MARKER = 'zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'
 # === configuration ===
 
 TWIK_CFG = Birch('twikwak17')
-TWIK_CFG_FPATH = '~/.config/twikwak17/cfg.json'
+TWIK_CFG_DPATH = os.path.expanduser('~/.config/twikwak17/')
+TWIK_CFG_FPATH = os.path.join(TWIK_CFG_DPATH, 'cfg.json')
 
 
 class CfgKey(object):
@@ -34,6 +35,47 @@ def error_raising_cfg_val_get(input_val, cfg_key):
         return TWIK_CFG[cfg_key]
     except KeyError:
         raise TwikwakConfigurationError(cfg_key, TWIK_CFG_FPATH)
+
+
+# --- session saves ---
+
+TWIK_CFG_SESSION_DPATH = os.path.join(TWIK_CFG_DPATH, 'sessions')
+os.makedirs(TWIK_CFG_SESSION_DPATH, exist_ok=True)
+
+
+class Session(object):
+    """A session of running the twikwak17 generation pipeline.
+
+    Parameters
+    ----------
+    time : float
+        The original start time of this session, in seconds since the epoch.
+        As returned by time.time().
+    kwargs : dict of str to str/float/int
+        The original kwargs the session was started with.
+    phases : dict, optional
+        A dict of nested dicts mapping the save parameters of all subphases.
+        If not given, initialized empty, to signify a new session.
+    current_subphase : str
+
+    """
+
+
+    def __init__(self, time, kwargs, phases=None, current_subphase=None):
+        self.time = time
+        self.kwargs = kwargs
+        self.phases = {}
+        self.current_subphase =
+
+    def fpath(self):
+        fname = 'session_{}.json'.format(self.time)
+        return os.path.join(TWIK_CFG_DPATH, fname)
+
+    def save(self):
+        pass
+
+
+# --- shared paths ---
 
 
 DEF_TWITTER7_FNAME_PATTERN = 'tweets2009-[\w\d_]+.txt.gz'
