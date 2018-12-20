@@ -1,6 +1,8 @@
 """Shared stuff for twikwak17."""
 
 import os
+import time
+import json
 from datetime import datetime, timedelta
 
 from birch import Birch
@@ -48,7 +50,7 @@ class Session(object):
 
     Parameters
     ----------
-    time : float
+    start_time : float
         The original start time of this session, in seconds since the epoch.
         As returned by time.time().
     kwargs : dict of str to str/float/int
@@ -56,23 +58,49 @@ class Session(object):
     phases : dict, optional
         A dict of nested dicts mapping the save parameters of all subphases.
         If not given, initialized empty, to signify a new session.
-    current_subphase : str
-
+    current_subphase : str, optional
+        The current subphase of the session; if not given, initialized to None,
+        to signify a new session.
     """
 
-
-    def __init__(self, time, kwargs, phases=None, current_subphase=None):
-        self.time = time
+    def __init__(self, start_time, kwargs, phases=None, current_subphase=None):
+        self.start_time = start_time
         self.kwargs = kwargs
         self.phases = {}
-        self.current_subphase =
+        self.current_phase = None
+        self.current_subphase = None
+        self.save_time = None
 
     def fpath(self):
-        fname = 'session_{}.json'.format(self.time)
+        """Returns the file path for saves of this session."""
+        gt = time.gmtime(self.start_time)
+        tstr = '_'.join(gt.tm_year, gt.tm_mon, gt.tm_mday, gt.tm_hour,
+                        gt.tm_min, gt.tm_sec)
+        fname = 'session_{}.json'.format(tstr)
         return os.path.join(TWIK_CFG_DPATH, fname)
 
-    def save(self):
-        pass
+    def save(self, phase, subphase, subphase_params):
+        """Saves the current state of this session to disk.
+
+        Parameters
+        ----------
+        phase : int
+            The current phase.
+        subphase : str
+            The current subphase.
+        subphase_params : dict
+            Parameters describing the current state of the current subphase.
+        """
+        self.save_time = time.time()
+        self.current_phase = phase
+        self.current_subphase = subphase
+        json.dump(self.__dict__, self.fpath())
+
+    @staticmethod
+    def load(session_fpath):
+        with open(session_fpath, 'rt') as f:
+            attr_dict = json.load(f)
+        return Session(**attr_dict)
 
 
 # --- shared paths ---

@@ -14,10 +14,12 @@ from .shared import (
     phase_output_dpath,
     qprint,
     seconds_to_duration_str,
+    Session,
 )
 
 
-def run_pipeline(tpath=None, kpath=None, output_dpath=None):
+def run_pipeline(
+        tpath=None, kpath=None, output_dpath=None, session_fpath=None):
     """Runs the entire data generation pipeline.
 
     Parameters
@@ -31,11 +33,32 @@ def run_pipeline(tpath=None, kpath=None, output_dpath=None):
     output_dpath : str, optional
         The path to the designated output folder. If not given, the value keyed
         to 'output_dpath' is looked up in the twikwak17 configuration file.
+    session_fpath : str, optional
+        The path to the save file of a previous session to continue. If not
+        given, a new session is created.
     """
-    start = time.time()
+    if session_fpath is None:
+        print("\n\nStarting a new twikwak17 session.")
+        start = time.time()
+        kwargs = {'tpath': tpath, 'kpath': kpath, 'output_dpath': output_dpath}
+        session = Session(
+            start_time=start,
+            kwargs=kwargs,
+            phases=None,
+            current_subphase=None,
+        )
+    else:
+        qprint(
+            "\n\nRestoring twikwak17 session from {}...".format(session_fpath))
+        session = Session.load(session_fpath)
+        start = session.start_time
+        tpath = session.kwargs['tpath']
+        kpath = session.kwargs['kpath']
+        output_dpath = session.kwargs['output_dpath']
     tpath = error_raising_cfg_val_get(tpath, CfgKey.TWITTER7_DPATH)
     kpath = error_raising_cfg_val_get(kpath, CfgKey.KWAK10_DPATH)
-    output_dpath = error_raising_cfg_val_get(output_dpath, CfgKey.OUTPUT_DPATH)
+    output_dpath = error_raising_cfg_val_get(
+        output_dpath, CfgKey.OUTPUT_DPATH)
     qprint((
         "\n\n######## twikwak17 ######## \n\n"
         "Starting to run the entire twikwak17 dataset generation pipeline."
@@ -64,7 +87,9 @@ def run_pipeline(tpath=None, kpath=None, output_dpath=None):
     ))
 
 
-def run_phases(phases, tpath=None, kpath=None, output_dpath=None):
+def run_phases(
+        phases, tpath=None, kpath=None, output_dpath=None,
+        sesssion_fpath=None):
     """Runs the entire data generation pipeline.
 
     Parameters
@@ -80,6 +105,9 @@ def run_phases(phases, tpath=None, kpath=None, output_dpath=None):
     output_dpath : str, optional
         The path to the designated output folder. If not given, the value keyed
         to 'output_dpath' is looked up in the twikwak17 configuration file.
+    session_fpath : str, optional
+        The path to the save file of a previous session to continue. If not
+        given, a new session is created.
     """
     start = time.time()
     tpath = error_raising_cfg_val_get(tpath, CfgKey.TWITTER7_DPATH)
