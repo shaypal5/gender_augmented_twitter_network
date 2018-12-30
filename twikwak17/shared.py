@@ -58,17 +58,19 @@ class Session(object):
     phases : dict, optional
         A dict of nested dicts mapping the save parameters of all subphases.
         If not given, initialized empty, to signify a new session.
-    current_subphase : str, optional
-        The current subphase of the session; if not given, initialized to None,
-        to signify a new session.
+    last_completed_subphase : str, optional
+        The last subphase completed by the session; if not given, initialized
+        to None, to signify a new session.
     """
 
-    def __init__(self, start_time, kwargs, phases=None, current_subphase=None):
+    def __init__(
+            self, start_time, kwargs, phases=None,
+            last_completed_subphase=None):
         self.start_time = start_time
         self.kwargs = kwargs
         self.phases = {}
-        self.current_phase = None
-        self.current_subphase = None
+        self.last_completed_phase = None
+        self.last_completed_subphase = None
         self.save_time = None
 
     def fpath(self):
@@ -85,15 +87,15 @@ class Session(object):
         Parameters
         ----------
         phase : int
-            The current phase.
+            The last completed phase.
         subphase : str
-            The current subphase.
+            The last completed subphase.
         subphase_params : dict
-            Parameters describing the current state of the current subphase.
+            Parameters describing the state of the last_completed subphase.
         """
         self.save_time = time.time()
-        self.current_phase = phase
-        self.current_subphase = subphase
+        self.last_completed_phase = phase
+        self.last_completed_subphase = subphase
         json.dump(self.__dict__, self.fpath())
 
     @staticmethod
@@ -191,6 +193,7 @@ def uname_intersection_fpath_by_dpath(dpath):
 # === printing ===
 
 QUIET = False
+SESSION_LOG_FPATH = None
 
 
 def set_print_quiet(set_val):
@@ -214,6 +217,9 @@ def qprint(*args, **kwargs):
     """A print function that can be quieted."""
     if not QUIET:
         print(*args, **kwargs)
+    if SESSION_LOG_FPATH is not None:
+        with open(SESSION_LOG_FPATH, 'ta+') as f:
+            print(*args, file=f)
 
 
 def seconds_to_duration_str(duration_in_seconds):

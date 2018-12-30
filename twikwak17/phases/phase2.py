@@ -2,6 +2,7 @@
 
 import os
 import re
+import gc
 import time
 import gzip
 from psutil import virtual_memory
@@ -56,6 +57,7 @@ def inverse_numeric2screen_into_multiple_files(output_dpath, kpath):
                     _dump_uname2id(uname_to_id, files_written, output_dpath)
                     files_written += 1
                     uname_to_id = SortedDict()
+                    gc.collect()
                     qprint("\bFile dumped.\n")
     qprint("{} files written.".format(files_written))
 
