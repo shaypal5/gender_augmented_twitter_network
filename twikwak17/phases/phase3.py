@@ -1,5 +1,6 @@
 """Phase 3 of the twikwak17 dataset generation pipeline."""
 
+import re
 import time
 import gzip
 from contextlib import ExitStack
@@ -43,6 +44,7 @@ def phase3(phase1_output_dpath, phase2_output_dpath, phase3_output_dpath):
         out_f = stack.enter_context(gzip.open(uname_out_fpath, 'wt+'))
         current_lines = [f.readline() for f in files]
         user_count = 0
+        uname_regex = '[^\s]+'
 
         def _increment_pointer(i):
             line = files[i].readline()
@@ -52,15 +54,28 @@ def phase3(phase1_output_dpath, phase2_output_dpath, phase3_output_dpath):
             current_lines[i] = line
 
         while any(current_lines):
+            # print("{}|{}".format(current_lines[0], current_lines[1]))
             if any([line == DONE_MARKER for line in current_lines]):
                 break
-            if current_lines[0] == current_lines[1]:
-                out_f.write(current_lines[0])
+            for i in [0, 1]:
+                x = current_lines[i]
+                if x == "\n" or x == "\r":
+                    _increment_pointer(i)
+                    continue
+            users = [
+                re.findall(uname_regex, line)[0]
+                for line in current_lines
+            ]
+            # print("{}||{}".format(users[0], users[1]))
+            if users[0] == users[1]:
+                out_f.write('{}\n'.format(users[0]))
                 _increment_pointer(0)
                 _increment_pointer(1)
                 user_count += 1
+                if user_count % 10000 == 0:
+                    print("{} users dumped".format(user_count), end="\r")
             else:
-                if current_lines[0] < current_lines[1]:
+                if users[0] < users[1]:
                     _increment_pointer(0)
                 else:
                     _increment_pointer(1)
