@@ -100,10 +100,10 @@ def run_phases(
         "Path to output folder: {}"
     ).format(phases, tpath, kpath, output_dpath))
 
-    big_phases = set([x[0] for x in phases])
+    # big_phases = set([x[0] for x in phases])
 
     phase1_out_dpath = phase_output_dpath(1, output_dpath)
-    if '1' in big_phases and last_completed_phase < '1':
+    if '1' in phases and last_completed_phase < '1':
         phase1(output_dpath=phase1_out_dpath, tpath=tpath)
     else:
         one_subphases = [p for p in phases if re.match("1\.\d", p)]
