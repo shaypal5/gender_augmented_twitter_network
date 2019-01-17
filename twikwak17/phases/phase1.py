@@ -4,6 +4,7 @@ import os
 import re
 import gzip
 import time
+import gc
 from psutil import virtual_memory
 from contextlib import ExitStack
 
@@ -63,7 +64,7 @@ DUMP_FNAME_MARKER = 'p1dump'
 USR_FNAME_MARKER = 'p1usr'
 
 
-def merge_user_tweets_in_file(
+def order_tweets_by_user_in_file(
         fpath, output_dpath, monitor_line_freq=None, min_mem_mb=None):
     """Splits a raw twitter7 tweets file into user-merged subset files.
 
@@ -109,8 +110,7 @@ def merge_user_tweets_in_file(
         )
         qprint(report, end='\r')
 
-    def _dump_file():
-        nonlocal usr_2_twits_str, files_written
+    def _dump_file(usr_2_twits_str, files_written):
         fname = os.path.split(fpath)[1]
         fname = fname[:fname.find('.')]
         dump_fpath = '{}/{}_{}_{}.txt.gz'.format(
@@ -122,10 +122,8 @@ def merge_user_tweets_in_file(
             tweets_fpath=dump_fpath,
             usr_fpath=usr_fpath,
         )
-        files_written += 1
-        usr_2_twits_str = SortedDict()
         qprint('\nTweets dumped for the {}-th time into {}'.format(
-            files_written, dump_fpath))
+            files_written + 1, dump_fpath))
 
     with gzip.open(fpath, 'rt') as textf:
         for i, line in enumerate(textf):
@@ -144,9 +142,30 @@ def merge_user_tweets_in_file(
                 _report()
                 av_mem = virtual_memory().available
                 if av_mem < min_mem_bytes:
-                    _dump_file()
+                    qprint(
+                        f"Avail. memory: {av_mem} | Min mem: {min_mem_bytes}")
+                    _dump_file(usr_2_twits_str, files_written)
+                    files_written += 1
+                    usr_2_twits_str = None
+                    del usr_2_twits_str
+                    # try to release memory explixitly
+                    gc.collect()
+                    usr_2_twits_str = SortedDict()
+                    av_mem = virtual_memory().available
+                    qprint(
+                        f"Avail. memory: {av_mem} | Min mem: {min_mem_bytes}")
     if len(usr_2_twits_str) > 0:
-        _dump_file()
+        qprint(
+            f"Avail. memory: {av_mem} | Min mem: {min_mem_bytes}")
+        _dump_file(usr_2_twits_str, files_written)
+        files_written += 1
+        usr_2_twits_str = None
+        del usr_2_twits_str
+        # try to release memory explixitly
+        gc.collect()
+        av_mem = virtual_memory().available
+        qprint(
+            f"Avail. memory: {av_mem} | Min mem: {min_mem_bytes}")
         _report()
 
 
@@ -280,11 +299,12 @@ def phase1(output_dpath, tpath=None, subphases=None):
             tpath, output_dpath))
 
     if (subphases is None) or ('1.1' in subphases):
-        qprint("\n\n---- 1.1 ----\nUser-wise merging per-file...")
+        qprint("\n\n---- 1.1 ----\nOrdering tweets by user per-file...")
         for fname in os.listdir(tpath):
             if not re.match(pattern=DEF_TWITTER7_FNAME_PATTERN, string=fname):
+                print(f"Skipping file {fname}; no pattern match.")
                 continue
-            merge_user_tweets_in_file(
+            order_tweets_by_user_in_file(
                 fpath=os.path.join(tpath, fname),
                 output_dpath=output_dpath,
             )

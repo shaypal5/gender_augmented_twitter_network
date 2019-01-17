@@ -21,6 +21,8 @@ The generation process of this dataset depends on two existing datasets, *kwak10
 Stats
 -----
 
+* The number of nodes in the dataset (as it is the number if users in the intersection of the *twitter7* dataset and the *kwak10www* dataset) is 2,996,026.
+
 Node intersection, resulting network size, etc..
 
 
@@ -73,7 +75,7 @@ The generation process is composed of several stages:
 
    2.2. Sort-merging the sorted username-to-id files into a single sorted username-to-id file named ``kwak10_uname_to_id.txt.gz`` and a single sorted username list named ``kwak10_unames.txt.gz``.
 
-3. The third stage merges the two sorted lists of user handles to create a lexicographically sorted list of the intersection between the two lists. It also creates two lists of the two `relative complements <https://en.wikipedia.org/wiki/Complement_(set_theory)#Relative_complement>`_ of each list in the other.
+3. The third stage merges the two sorted lists of user handles (``twitter7_user_list.txt.gz`` and ``kwak10_unames.txt.gz``) to create a lexicographically sorted list of the intersection between the two lists. 
 
 4. The fourth stage runs each line - in the user-wise merged tweets files - belonging to a user in the intersection list through the `SPEKS gender predictor for Twitter <https://github.com/shaypal5/speks>`_, and generates a lexicographically sorted user-handle-to-gender mapping.
 
