@@ -163,7 +163,7 @@ def t7_user_list_fpath_by_dpath(dpath):
 TWEET_LIST_FNAME = 'twitter7_tweet_list.txt.gz'
 
 
-def tweet_list_fpath_by_dpath(dpath):
+def twitter7_tweet_list_fpath_by_dpath(dpath):
     return os.path.join(dpath, TWEET_LIST_FNAME)
 
 
@@ -188,6 +188,15 @@ UNAME_INTERSECTION_FNAME = 'uname_intersection.txt.gz'
 
 def uname_intersection_fpath_by_dpath(dpath):
     return os.path.join(dpath, UNAME_INTERSECTION_FNAME)
+
+
+# --- phase 4 ---
+
+GENDER_MAPPING_FNAME = 'username_to_gender_txt.gz'
+
+
+def uname_to_gender_map_fpath_by_dpath(dpath):
+    return os.path.join(dpath, GENDER_MAPPING_FNAME)
 
 
 # === printing ===

@@ -77,7 +77,7 @@ The generation process is composed of several stages:
 
 3. The third stage merges the two sorted lists of user handles (``twitter7_user_list.txt.gz`` and ``kwak10_unames.txt.gz``) to create a lexicographically sorted list of the intersection between the two lists. 
 
-4. The fourth stage runs each line - in the user-wise merged tweets files - belonging to a user in the intersection list through the `SPEKS gender predictor for Twitter <https://github.com/shaypal5/speks>`_, and generates a lexicographically sorted user-handle-to-gender mapping.
+4. The fourth stage runs each line - in the twitter7 user-wise merged tweets files - belonging to a user in the intersection list through the `SPEKS gender predictor for Twitter <https://github.com/shaypal5/speks>`_, and generates a lexicographically sorted user-handle-to-gender mapping.
 
 5. The fifth stage uses the aforementioned handle-to-numeric-id mapping to transform the user-handle-to-gender mapping into a user-id-to-gender mapping.
 

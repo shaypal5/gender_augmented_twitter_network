@@ -13,6 +13,7 @@ INSTALL_REQUIRES = [
     'birch>=0.0.13',
     'sortedcontainers>=2.0',
     'ezenum>=0.0.3',
+    'speks',
 ]
 TEST_REQUIRES = [
     # testing and coverage
