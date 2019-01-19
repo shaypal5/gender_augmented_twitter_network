@@ -42,7 +42,7 @@ def gender_classify_users_in_intersection_by_twitter7(
         The path to the designated output folder.
     """
     qprint((
-        "\nStarting to classify gender of users in {} by tweets in {};"
+        "\nStarting to classify gender of users in {} by tweets in {}; "
         "Dumping into {}."
     ).format(
         user_intersection_fpath, twitter7_tweets_by_user_fpath,
@@ -54,7 +54,9 @@ def gender_classify_users_in_intersection_by_twitter7(
         users_f = stack.enter_context(gzip.open(user_intersection_fpath, 'rt'))
         out_f = stack.enter_context(gzip.open(output_fpath, 'wt'))
         uname_regex = '[^\s]+'
-        user_count = 0
+        users_read = 0
+        users_matched = 0
+        users_dumped = 0
         users_and_genders_to_dump = []
 
         t7_line = tweets_f.readline()
@@ -66,21 +68,30 @@ def gender_classify_users_in_intersection_by_twitter7(
             if t7_user == list_user:
                 gender = predict_gender_by_tweets(tweets)
                 users_and_genders_to_dump.append(f"{t7_user} {gender}")
-                user_count += 1
-                if user_count % 100000 == 0:
+                users_matched += 1
+                if users_matched % 100000 == 0:
                     out_f.writelines(users_and_genders_to_dump)
+                    users_dumped += 100000
                     users_and_genders_to_dump = None
                     del users_and_genders_to_dump
                     gc.collect()
                     users_and_genders_to_dump = []
-                    print("{} users dumped".format(user_count), end="\r")
                 t7_line = tweets_f.readline()
                 list_line = users_f.readline()
             elif t7_user < list_user:
                 t7_line = tweets_f.readline()
             else:
                 list_line = users_f.readline()
-        return user_count
+            users_read += 1
+            if users_read % 10000 == 0:
+                print(f"{users_read} users read; {users_matched} matched",
+                      end="\r")
+            # if users_read % 100000 == 0:
+            #     print(f"|{t7_user}|{list_user}")
+        if len(users_and_genders_to_dump) > 0:
+            out_f.writelines(users_and_genders_to_dump)
+            users_dumped += len(users_and_genders_to_dump)
+        return users_dumped
 
 
 def phase4(phase1_output_dpath, phase3_output_dpath, phase4_output_dpath):
@@ -104,8 +115,8 @@ def phase4(phase1_output_dpath, phase3_output_dpath, phase4_output_dpath):
 
     qprint("\n\n====== PHASE 4 =====")
     qprint((
-        "Starting phase 4 from \n{t7_tweets_by_user_fpath} and "
-        "\n{user_intersection_fpath} \ninput files to {output_fpath}"
+        f"Starting phase 4 from \n{t7_tweets_by_user_fpath} and "
+        f"\n{user_intersection_fpath} \ninput files to {output_fpath}"
         "output file."))
 
     user_count = gender_classify_users_in_intersection_by_twitter7(

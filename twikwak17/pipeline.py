@@ -7,6 +7,7 @@ from .phases import (
     phase1,
     phase2,
     phase3,
+    phase4,
 )
 from .shared import (
     CfgKey,
@@ -126,6 +127,14 @@ def run_phases(
             phase1_output_dpath=phase1_out_dpath,
             phase2_output_dpath=phase2_out_dpath,
             phase3_output_dpath=phase3_out_dpath,
+        )
+
+    phase4_out_dpath = phase_output_dpath(4, output_dpath)
+    if '4' in phases:
+        phase4(
+            phase1_output_dpath=phase1_out_dpath,
+            phase3_output_dpath=phase3_out_dpath,
+            phase4_output_dpath=phase4_out_dpath,
         )
 
     end = time.time()

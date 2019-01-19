@@ -151,6 +151,13 @@ def phase_output_dpath(phase_ix, output_dpath):
     return dpath
 
 
+def phase_output_report_fpath(phase, dpath):
+    return os.path.join(
+        dpath,
+        f'phase_{phase}_output_report.txt',
+    )
+
+
 # --- phase 1 ----
 
 USER_LIST_FNAME = 'twitter7_user_list.txt.gz'
