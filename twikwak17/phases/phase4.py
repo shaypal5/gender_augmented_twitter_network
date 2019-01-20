@@ -14,6 +14,8 @@ from twikwak17.shared import (
     uname_intersection_fpath_by_dpath,
     uname_to_gender_map_fpath_by_dpath,
     seconds_to_duration_str,
+    phase_output_report_fpath,
+    set_output_report_file_handle,
 )
 
 
@@ -112,23 +114,28 @@ def phase4(phase1_output_dpath, phase3_output_dpath, phase4_output_dpath):
     user_intersection_fpath = uname_intersection_fpath_by_dpath(
         phase3_output_dpath)
     output_fpath = uname_to_gender_map_fpath_by_dpath(phase4_output_dpath)
+    output_report_fpath = phase_output_report_fpath(4, phase4_output_dpath)
 
-    qprint("\n\n====== PHASE 4 =====")
-    qprint((
-        f"Starting phase 4 from \n{t7_tweets_by_user_fpath} and "
-        f"\n{user_intersection_fpath} \ninput files to {output_fpath}"
-        "output file."))
+    with open(output_report_fpath, 'wt+') as output_report_f:
+        set_output_report_file_handle(output_report_f)
+        qprint("\n\n====== PHASE 4 =====")
+        qprint((
+            f"Starting phase 4 from \n{t7_tweets_by_user_fpath} and "
+            f"\n{user_intersection_fpath} \ninput files to {output_fpath}"
+            "output file."))
 
-    user_count = gender_classify_users_in_intersection_by_twitter7(
-        t7_tweets_by_user_fpath,
-        user_intersection_fpath,
-        output_fpath,
-    )
+        user_count = gender_classify_users_in_intersection_by_twitter7(
+            t7_tweets_by_user_fpath,
+            user_intersection_fpath,
+            output_fpath,
+        )
 
-    qprint(f"{user_count} users gender classified; dumped to {output_fpath}.")
+        qprint(
+            f"{user_count} users gender classified; dumped to {output_fpath}.")
 
-    end = time.time()
-    print((
-        "Finished running phase 3 of the twikwak17 pipeline.\n"
-        "Run duration: {}".format(seconds_to_duration_str(end - start))
-    ))
+        end = time.time()
+        qprint((
+            "Finished running phase 4 of the twikwak17 pipeline.\n"
+            "Run duration: {}".format(seconds_to_duration_str(end - start))
+        ))
+        set_output_report_file_handle(None)

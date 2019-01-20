@@ -210,6 +210,7 @@ def uname_to_gender_map_fpath_by_dpath(dpath):
 
 QUIET = False
 SESSION_LOG_FPATH = None
+OUTPUT_REPORT_F_HANDLE = None
 
 
 def set_print_quiet(set_val):
@@ -225,6 +226,20 @@ def set_print_quiet(set_val):
         QUIET = set_val
 
 
+def set_output_report_file_handle(f_handle):
+    """Sets the given file handle for as the output report handle.
+
+    Once set, qprint() calls are also written to the output report.
+
+    Parameters
+    ----------
+    f_handle : file
+        If None is given, writing to the output report is ceased.
+    """
+    global OUTPUT_REPORT_F_HANDLE
+    OUTPUT_REPORT_F_HANDLE = f_handle
+
+
 if CfgKey.QUIET in TWIK_CFG:
     set_print_quiet(TWIK_CFG[CfgKey.QUIET])
 
@@ -236,6 +251,8 @@ def qprint(*args, **kwargs):
     if SESSION_LOG_FPATH is not None:
         with open(SESSION_LOG_FPATH, 'ta+') as f:
             print(*args, file=f)
+    if OUTPUT_REPORT_F_HANDLE is not None:
+        print(*args, file=OUTPUT_REPORT_F_HANDLE)
 
 
 def seconds_to_duration_str(duration_in_seconds):
