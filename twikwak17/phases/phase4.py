@@ -121,7 +121,7 @@ def phase4(phase1_output_dpath, phase3_output_dpath, phase4_output_dpath):
         qprint("\n\n====== PHASE 4 =====")
         qprint((
             f"Starting phase 4 from \n{t7_tweets_by_user_fpath} and "
-            f"\n{user_intersection_fpath} \ninput files to {output_fpath}"
+            f"\n{user_intersection_fpath} \ninput files to {output_fpath} "
             "output file."))
 
         user_count = gender_classify_users_in_intersection_by_twitter7(
