@@ -16,6 +16,7 @@ from twikwak17.shared import (
     seconds_to_duration_str,
     phase_output_report_fpath,
     set_output_report_file_handle,
+    create_timestamped_report_file_copy,
 )
 
 
@@ -139,3 +140,4 @@ def phase4(phase1_output_dpath, phase3_output_dpath, phase4_output_dpath):
             "Run duration: {}".format(seconds_to_duration_str(end - start))
         ))
         set_output_report_file_handle(None)
+        create_timestamped_report_file_copy(output_report_fpath)

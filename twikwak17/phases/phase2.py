@@ -17,6 +17,9 @@ from twikwak17.shared import (
     kwak10_unames_fpath_by_dpath,
     seconds_to_duration_str,
     DONE_MARKER,
+    phase_output_report_fpath,
+    set_output_report_file_handle,
+    create_timestamped_report_file_copy,
 )
 
 
@@ -136,26 +139,32 @@ def phase2(output_dpath, kpath=None, subphases=None):
     if kpath is None:
         kpath = kwak10_dpath()
     os.makedirs(output_dpath, exist_ok=True)
-    qprint("\n\n====== PHASE 2 =====")
-    qprint("Starting phase 2 from {} input dir to {} output dir.".format(
-            kpath, output_dpath))
+    output_report_fpath = phase_output_report_fpath(2, output_dpath)
 
-    if (subphases is None) or ('2.1' in subphases):
-        qprint((
-            "\n\n---- 2.1 ----\n"
-            "Inverting numeric2screen into several files..."))
-        inverse_numeric2screen_into_multiple_files(output_dpath, kpath)
+    with open(output_report_fpath, 'wt+') as output_report_f:
+        set_output_report_file_handle(output_report_f)
+        qprint("\n\n====== PHASE 2 =====")
+        qprint("Starting phase 2 from {} input dir to {} output dir.".format(
+                kpath, output_dpath))
 
-    uname_fpath = kwak10_unames_fpath_by_dpath(output_dpath)
-    uname2id_fpath = uname2id_fpath_by_dpath(output_dpath)
-    if (subphases is None) or ('2.2' in subphases):
-        qprint("\n\n---- 2.2 ----\nDumping user name list to {}...".format(
-            uname_fpath))
-        merge_user_files(output_dpath, uname_fpath, uname2id_fpath)
+        if (subphases is None) or ('2.1' in subphases):
+            qprint((
+                "\n\n---- 2.1 ----\n"
+                "Inverting numeric2screen into several files..."))
+            inverse_numeric2screen_into_multiple_files(output_dpath, kpath)
 
-    print("\n\n====== END-OF PHASE 2 ======")
-    end = time.time()
-    print((
-        "Finished running phase 2 of the twikwak17 pipeline.\n"
-        "Run duration: {}".format(seconds_to_duration_str(end - start))
-    ))
+        uname_fpath = kwak10_unames_fpath_by_dpath(output_dpath)
+        uname2id_fpath = uname2id_fpath_by_dpath(output_dpath)
+        if (subphases is None) or ('2.2' in subphases):
+            qprint("\n\n---- 2.2 ----\nDumping user name list to {}...".format(
+                uname_fpath))
+            merge_user_files(output_dpath, uname_fpath, uname2id_fpath)
+
+        print("\n\n====== END-OF PHASE 2 ======")
+        end = time.time()
+        print((
+            "Finished running phase 2 of the twikwak17 pipeline.\n"
+            "Run duration: {}".format(seconds_to_duration_str(end - start))
+        ))
+        set_output_report_file_handle(None)
+        create_timestamped_report_file_copy(output_report_fpath)

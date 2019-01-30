@@ -4,6 +4,7 @@ import os
 import time
 import json
 from datetime import datetime, timedelta
+from shutil import copyfile
 
 from birch import Birch
 
@@ -45,6 +46,12 @@ TWIK_CFG_SESSION_DPATH = os.path.join(TWIK_CFG_DPATH, 'sessions')
 os.makedirs(TWIK_CFG_SESSION_DPATH, exist_ok=True)
 
 
+def time_to_nice_time_str(time_in_sec):
+        gt = time.gmtime(time_in_sec)
+        return '_'.join(gt.tm_year, gt.tm_mon, gt.tm_mday, gt.tm_hour,
+                        gt.tm_min, gt.tm_sec)
+
+
 class Session(object):
     """A session of running the twikwak17 generation pipeline.
 
@@ -75,11 +82,8 @@ class Session(object):
 
     def fpath(self):
         """Returns the file path for saves of this session."""
-        gt = time.gmtime(self.start_time)
-        tstr = '_'.join(gt.tm_year, gt.tm_mon, gt.tm_mday, gt.tm_hour,
-                        gt.tm_min, gt.tm_sec)
-        fname = 'session_{}.json'.format(tstr)
-        return os.path.join(TWIK_CFG_DPATH, fname)
+        tstr = time_to_nice_time_str(self.start_time)
+        return os.path.join(TWIK_CFG_DPATH, f'session_{tstr}.json')
 
     def save(self, phase, subphase, subphase_params):
         """Saves the current state of this session to disk.
@@ -259,3 +263,10 @@ def seconds_to_duration_str(duration_in_seconds):
     sec = timedelta(seconds=duration_in_seconds)
     d = datetime(1, 1, 1) + sec
     return "{} days and {}:{}:{}".format(d.day-1, d.hour, d.minute, d.second)
+
+
+def create_timestamped_report_file_copy(report_fpath):
+    fpath_no_ext, ext = os.path.splitext(report_fpath)
+    time_str = time_to_nice_time_str(time.time())
+    copy_fpath = fpath_no_ext + '_' + time_str + ext
+    copyfile(report_fpath, copy_fpath)
