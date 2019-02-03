@@ -53,7 +53,7 @@ def phase3(phase1_output_dpath, phase2_output_dpath, phase3_output_dpath):
         current_lines = [None, None]
         user_count = 0
         line_count = 0
-        uname_regex = '.+'
+        uname_regex = '\s?[^\s]+'
 
         def _increment_pointer(i):
             nonlocal line_count
@@ -69,14 +69,14 @@ def phase3(phase1_output_dpath, phase2_output_dpath, phase3_output_dpath):
         _increment_pointer(0)
         _increment_pointer(1)
         while any(current_lines):
-            print("{}|{}".format(current_lines[0], current_lines[1]))
+            # print("|{}|{}|".format(current_lines[0], current_lines[1]))
             if any([line == DONE_MARKER for line in current_lines]):
                 break
             users = [
                 re.findall(uname_regex, line)[0]
                 for line in current_lines
             ]
-            print("{}||{}".format(users[0], users[1]))
+            # print("||{}||{}||".format(users[0], users[1]))
             if users[0] == users[1]:
                 out_f.write('{}\n'.format(users[0]))
                 _increment_pointer(0)
