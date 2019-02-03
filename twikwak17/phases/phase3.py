@@ -43,53 +43,56 @@ def phase3(phase1_output_dpath, phase2_output_dpath, phase3_output_dpath):
         qprint("\n\n====== PHASE 3 =====")
         qprint((
             f"Starting phase 3 from \n{phase1_output_dpath} "
-            f"\n{phase2_output_dpath} \ninput dir to "
+            f"\n{phase2_output_dpath} \ninput directoris to the "
             f"{phase3_output_dpath} output dir."))
 
         t7_f = stack.enter_context(gzip.open(t7_unames_fpath, 'rt'))
         k10_f = stack.enter_context(gzip.open(k10_unames_fpath, 'rt'))
         files = [t7_f, k10_f]
         out_f = stack.enter_context(gzip.open(uname_out_fpath, 'wt+'))
-        current_lines = [f.readline() for f in files]
+        current_lines = [None, None]
         user_count = 0
-        uname_regex = '[^\s]+'
+        line_count = 0
+        uname_regex = '.+'
 
         def _increment_pointer(i):
+            nonlocal line_count
             line = files[i].readline()
+            line_count += 1
             if len(line) < 1:
                 current_lines[i] = DONE_MARKER
-                return
-            current_lines[i] = line
+            elif line == "\n" or line == "\r":
+                _increment_pointer(i)
+            else:
+                current_lines[i] = line
 
+        _increment_pointer(0)
+        _increment_pointer(1)
         while any(current_lines):
-            # print("{}|{}".format(current_lines[0], current_lines[1]))
+            print("{}|{}".format(current_lines[0], current_lines[1]))
             if any([line == DONE_MARKER for line in current_lines]):
                 break
-            for i in [0, 1]:
-                x = current_lines[i]
-                if x == "\n" or x == "\r":
-                    _increment_pointer(i)
-                    continue
             users = [
                 re.findall(uname_regex, line)[0]
                 for line in current_lines
             ]
-            # print("{}||{}".format(users[0], users[1]))
+            print("{}||{}".format(users[0], users[1]))
             if users[0] == users[1]:
                 out_f.write('{}\n'.format(users[0]))
                 _increment_pointer(0)
                 _increment_pointer(1)
                 user_count += 1
-                if user_count % 10000 == 0:
-                    print("{} users dumped".format(user_count), end="\r")
             else:
                 if users[0] < users[1]:
                     _increment_pointer(0)
                 else:
                     _increment_pointer(1)
+            if line_count % 10000 == 0:
+                print((f"{line_count:,} lines read, {user_count:,} "
+                       f"users dumped"), end="\r")
 
-        qprint("{} intersection users dumped into {}.".format(
-            user_count, uname_out_fpath))
+        qprint((f"{user_count:,} intersection users dumped into "
+                f"{uname_out_fpath}."))
 
         end = time.time()
         print((

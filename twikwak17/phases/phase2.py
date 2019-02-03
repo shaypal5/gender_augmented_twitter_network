@@ -118,8 +118,8 @@ def merge_user_files(input_dpath, uname_fpath, uname2id_fpath):
             uname2id_f.write('{} {}\n'.format(min_user, min_id))
             _increment_pointer(ix)
             user_count += 1
-    qprint("{} twitter7 users dumped into {} and {}.".format(
-        user_count, uname_fpath, uname2id_fpath))
+        qprint((f"{user_count:,} kwak10 users dumped into {uname_fpath} "
+                f"and {uname2id_fpath}."))
 
 
 def phase2(output_dpath, kpath=None, subphases=None):

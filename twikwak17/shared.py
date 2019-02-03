@@ -48,8 +48,8 @@ os.makedirs(TWIK_CFG_SESSION_DPATH, exist_ok=True)
 
 def time_to_nice_time_str(time_in_sec):
         gt = time.gmtime(time_in_sec)
-        return '_'.join(gt.tm_year, gt.tm_mon, gt.tm_mday, gt.tm_hour,
-                        gt.tm_min, gt.tm_sec)
+        return (f'{gt.tm_year}_{gt.tm_mon:02}_{gt.tm_mday:02}_'
+                f'{gt.tm_hour:02}:{gt.tm_min:02}:{gt.tm_sec:02}')
 
 
 class Session(object):
