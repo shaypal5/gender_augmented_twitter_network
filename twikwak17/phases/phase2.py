@@ -37,7 +37,7 @@ def _dump_uname2id(uname_2_id, files_written, output_dpath):
             output_dpath, USR_FNAME_MARKER, files_written)
         with gzip.open(dump_fpath, 'wt+') as f:
             for uname, uid in uname_2_id.items():
-                f.write('{} {}\n'.format(uname, uid))
+                f.write(f'{uname} {uid}\n')
 
 
 def inverse_numeric2screen_into_multiple_files(output_dpath, kpath):
@@ -54,14 +54,14 @@ def inverse_numeric2screen_into_multiple_files(output_dpath, kpath):
             uname_to_id[uname] = uid
             i += 1
             if i % 10000 == 0:
-                print("{:,} lines read".format(i), end="\r")
+                print(f"{i:,} lines read |{uid}|{uname}|          ", end="\r")
                 av_mem = virtual_memory().available
                 if av_mem < min_mem_bytes or (i % LINE_DUMP_FREQ == 0):
                     _dump_uname2id(uname_to_id, files_written, output_dpath)
                     files_written += 1
                     uname_to_id = SortedDict()
                     gc.collect()
-                    qprint("\bFile dumped.\n")
+                    qprint("\bFile dumped.                                \n")
     qprint("{} files written.".format(files_written))
 
 
@@ -88,7 +88,7 @@ def merge_user_files(input_dpath, uname_fpath, uname2id_fpath):
             min_line = min(current_lines)
             match_groups = re.match(UNAME2ID_REGEX, min_line.replace('\n', ''))
             try:
-                min_usr, min_id = match_groups[0], match_groups[1]
+                min_usr, min_id = match_groups[1], match_groups[2]
             except TypeError:
                 min_usr = DONE_MARKER
                 min_id = 0

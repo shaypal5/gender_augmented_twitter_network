@@ -53,7 +53,7 @@ def phase3(phase1_output_dpath, phase2_output_dpath, phase3_output_dpath):
         current_lines = [None, None]
         user_count = 0
         line_count = 0
-        uname_regex = '\s?[^\s]+'
+        uname_regex = '\s*\S+'
 
         def _increment_pointer(i):
             nonlocal line_count
@@ -77,7 +77,9 @@ def phase3(phase1_output_dpath, phase2_output_dpath, phase3_output_dpath):
                 for line in current_lines
             ]
             # print("||{}||{}||".format(users[0], users[1]))
-            if users[0] == users[1]:
+            if users[0] == "_":
+                _increment_pointer(0)
+            elif users[0] == users[1]:
                 out_f.write('{}\n'.format(users[0]))
                 _increment_pointer(0)
                 _increment_pointer(1)
@@ -89,7 +91,7 @@ def phase3(phase1_output_dpath, phase2_output_dpath, phase3_output_dpath):
                     _increment_pointer(1)
             if line_count % 10000 == 0:
                 print((f"{line_count:,} lines read, {user_count:,} "
-                       f"users dumped"), end="\r")
+                       f"users dumped.[{users[0]}][{users[1]}]"), end="\r")
 
         qprint((f"{user_count:,} intersection users dumped into "
                 f"{uname_out_fpath}."))
