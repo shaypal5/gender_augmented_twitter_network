@@ -20,6 +20,7 @@ from twikwak17.shared import (
     phase_output_report_fpath,
     set_output_report_file_handle,
     create_timestamped_report_file_copy,
+    sort_username_file,
 )
 
 
@@ -68,7 +69,7 @@ def inverse_numeric2screen_into_multiple_files(output_dpath, kpath):
 USR_FNAME_RGX = '{}_[\d]+.txt.gz'.format(USR_FNAME_MARKER)
 
 
-def merge_user_files(input_dpath, uname_fpath, uname2id_fpath):
+def merge_user_files(input_dpath, uname_fpath, uname2id_fpath, output_dpath):
     qprint("Starting to merge all kwak10 user lists in {}".format(
         input_dpath))
     filepaths = [
@@ -120,6 +121,14 @@ def merge_user_files(input_dpath, uname_fpath, uname2id_fpath):
             user_count += 1
         qprint((f"{user_count:,} kwak10 users dumped into {uname_fpath} "
                 f"and {uname2id_fpath}."))
+    qprint("Sorting user file...")
+    sorted_output_fpath = kwak10_unames_fpath_by_dpath(
+        output_dpath, sorted=True)
+    sort_username_file(
+        input_fpath=uname_fpath, output_fpath=sorted_output_fpath)
+    qprint("User file sorted!")
+    qprint((f"{user_count:,} kwak10 users dumped into {uname_fpath}"
+            " and {sorted_output_fpath}"))
 
 
 def phase2(output_dpath, kpath=None, subphases=None):
@@ -158,7 +167,8 @@ def phase2(output_dpath, kpath=None, subphases=None):
         if (subphases is None) or ('2.2' in subphases):
             qprint("\n\n---- 2.2 ----\nDumping user name list to {}...".format(
                 uname_fpath))
-            merge_user_files(output_dpath, uname_fpath, uname2id_fpath)
+            merge_user_files(
+                output_dpath, uname_fpath, uname2id_fpath, output_dpath)
 
         print("\n\n====== END-OF PHASE 2 ======")
         end = time.time()

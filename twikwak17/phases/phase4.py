@@ -54,7 +54,8 @@ def gender_classify_users_in_intersection_by_twitter7(
     with ExitStack() as stack:
         tweets_f = stack.enter_context(
             gzip.open(twitter7_tweets_by_user_fpath, 'rt'))
-        users_f = stack.enter_context(gzip.open(user_intersection_fpath, 'rt'))
+        intrsct_f = stack.enter_context(
+            gzip.open(user_intersection_fpath, 'rt'))
         out_f = stack.enter_context(gzip.open(output_fpath, 'wt'))
         uname_regex = '[^\s]+'
         users_read = 0
@@ -63,11 +64,11 @@ def gender_classify_users_in_intersection_by_twitter7(
         users_and_genders_to_dump = []
 
         t7_line = tweets_f.readline()
-        list_line = users_f.readline()
+        intrsct_line = intrsct_f.readline()
 
-        while t7_line and list_line:
+        while t7_line and intrsct_line:
             t7_user, tweets = _uname_and_tweets_from_line(tweets_f.readline())
-            list_user = re.findall(uname_regex, list_line)[0]
+            list_user = re.findall(uname_regex, intrsct_line)[0]
             if t7_user == list_user:
                 gender = predict_gender_by_tweets(tweets)
                 users_and_genders_to_dump.append(f"{t7_user} {gender}")
@@ -80,11 +81,11 @@ def gender_classify_users_in_intersection_by_twitter7(
                     gc.collect()
                     users_and_genders_to_dump = []
                 t7_line = tweets_f.readline()
-                list_line = users_f.readline()
+                intrsct_line = intrsct_f.readline()
             elif t7_user < list_user:
                 t7_line = tweets_f.readline()
             else:
-                list_line = users_f.readline()
+                intrsct_line = intrsct_f.readline()
             users_read += 1
             if users_read % 10000 == 0:
                 print(f"{users_read} users read; {users_matched} matched",
@@ -111,7 +112,7 @@ def phase4(phase1_output_dpath, phase3_output_dpath, phase4_output_dpath):
     """
     start = time.time()
     t7_tweets_by_user_fpath = twitter7_tweet_list_fpath_by_dpath(
-        phase1_output_dpath)
+        phase1_output_dpath, sorted=True)
     user_intersection_fpath = uname_intersection_fpath_by_dpath(
         phase3_output_dpath)
     output_fpath = uname_to_gender_map_fpath_by_dpath(phase4_output_dpath)

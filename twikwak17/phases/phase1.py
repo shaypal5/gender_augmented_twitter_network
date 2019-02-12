@@ -19,6 +19,9 @@ from twikwak17.shared import (
     t7_user_list_fpath_by_dpath,
     twitter7_tweet_list_fpath_by_dpath,
     seconds_to_duration_str,
+    sort_username_file,
+    phase_output_report_fpath,
+    set_output_report_file_handle,
 )
 
 
@@ -130,7 +133,7 @@ def order_tweets_by_user_in_file(
             try:
                 ltype, lcontent = interpret_line(line)
                 if ltype == LINETYPE.User:
-                    most_recent_user = lcontent
+                    most_recent_user = lcontent.lower()
                 elif ltype == LINETYPE.Content and lcontent != NO_CONTENT_STR:
                     usr_2_twits_str[most_recent_user] = usr_2_twits_str.get(
                         most_recent_user, '') + ' ' + lcontent
@@ -210,8 +213,15 @@ def merge_user_files(dpath):
             for i in min_ixs:
                 _increment_pointer(i)
             user_count += 1
-    qprint("{} twitter7 users dumped into {}".format(
-        user_count, output_fpath))
+
+    qprint(f"{user_count} twitter7 users dumped into {output_fpath}")
+    qprint("Sorting user file...")
+    sorted_output_fpath = t7_user_list_fpath_by_dpath(dpath, sorted=True)
+    sort_username_file(
+        input_fpath=output_fpath, output_fpath=sorted_output_fpath)
+    qprint("User file sorted!")
+    qprint((f"{user_count:,} twitter7 users dumped into {output_fpath}"
+            " and {sorted_output_fpath}"))
 
 
 def _uname_and_tweets_from_line(line):
@@ -276,6 +286,15 @@ def merge_dump_files(dpath):
             user_count += 1
     qprint("Finished merging tweet files. {} users found.".format(user_count))
 
+    # qprint("Sorting tweets file...")
+    # sorted_output_fpath = twitter7_tweet_list_fpath_by_dpath(
+    #     dpath, sorted=True)
+    # sort_username_file(
+    #     input_fpath=output_fpath, output_fpath=sorted_output_fpath)
+    # qprint("Tweets file sorted!")
+    # qprint((f"twitter7 tweets dumped into {output_fpath}"
+    #         " and {sorted_output_fpath}"))
+
 
 def phase1(output_dpath, tpath=None, subphases=None):
     """Splits a raw twitter7 tweets file into user-merged subset files.
@@ -294,32 +313,37 @@ def phase1(output_dpath, tpath=None, subphases=None):
     if tpath is None:
         tpath = twitter7_dpath()
     os.makedirs(output_dpath, exist_ok=True)
-    qprint("\n\n====== PHASE 1 =====")
-    qprint("Starting phase 1 from {} input dir to {} output dir.".format(
-            tpath, output_dpath))
+    output_report_fpath = phase_output_report_fpath(1, output_dpath)
 
-    if (subphases is None) or ('1.1' in subphases):
-        qprint("\n\n---- 1.1 ----\nOrdering tweets by user per-file...")
-        for fname in os.listdir(tpath):
-            if not re.match(pattern=DEF_TWITTER7_FNAME_PATTERN, string=fname):
-                print(f"Skipping file {fname}; no pattern match.")
-                continue
-            order_tweets_by_user_in_file(
-                fpath=os.path.join(tpath, fname),
-                output_dpath=output_dpath,
-            )
+    with open(output_report_fpath, 'wt+') as output_report_f:
+        set_output_report_file_handle(output_report_f)
+        qprint("\n\n====== PHASE 1 =====")
+        qprint("Starting phase 1 from {} input dir to {} output dir.".format(
+                tpath, output_dpath))
 
-    if (subphases is None) or ('1.2' in subphases):
-        qprint("\n\n---- 1.2 ----\nMerging user files...")
-        merge_user_files(output_dpath)
+        if (subphases is None) or ('1.1' in subphases):
+            qprint("\n\n---- 1.1 ----\nOrdering tweets by user per-file...")
+            for fname in os.listdir(tpath):
+                if not re.match(
+                        pattern=DEF_TWITTER7_FNAME_PATTERN, string=fname):
+                    print(f"Skipping file {fname}; no pattern match.")
+                    continue
+                order_tweets_by_user_in_file(
+                    fpath=os.path.join(tpath, fname),
+                    output_dpath=output_dpath,
+                )
 
-    if (subphases is None) or ('1.3' in subphases):
-        qprint("\n\n---- 1.3 ----\nMerging tweet files...")
-        merge_dump_files(output_dpath)
+        if (subphases is None) or ('1.2' in subphases):
+            qprint("\n\n---- 1.2 ----\nMerging user files...")
+            merge_user_files(output_dpath)
 
-    qprint("\n\n====== END-OF PHASE 1 ======")
-    end = time.time()
-    print((
-        "Finished running phase 1 of the twikwak17 pipeline.\n"
-        "Run duration: {}".format(seconds_to_duration_str(end - start))
-    ))
+        if (subphases is None) or ('1.3' in subphases):
+            qprint("\n\n---- 1.3 ----\nMerging tweet files...")
+            merge_dump_files(output_dpath)
+
+        qprint("\n\n====== END-OF PHASE 1 ======")
+        end = time.time()
+        print((
+            "Finished running phase 1 of the twikwak17 pipeline.\n"
+            "Run duration: {}".format(seconds_to_duration_str(end - start))
+        ))
