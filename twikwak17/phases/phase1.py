@@ -22,6 +22,7 @@ from twikwak17.shared import (
     sort_username_file,
     phase_output_report_fpath,
     set_output_report_file_handle,
+    create_timestamped_report_file_copy,
 )
 
 
@@ -61,10 +62,11 @@ BYTES_IN_MB = 1000000
 MIN_AVAIL_MEM_MB_DEF = 500
 REPORT_TEMPLATE = (
     '{:.2f} min running | {:,} lines processed | ~ {:,} tweets processed |'
-    ' {:,} tpm | {} files written | {:,} available memory [b]'
+    ' {:,} tpm | {} files written | {:,.2f} available memory [MB]'
 )
 DUMP_FNAME_MARKER = 'p1dump'
 USR_FNAME_MARKER = 'p1usr'
+MIL = 1000000
 
 
 def order_tweets_by_user_in_file(
@@ -109,11 +111,18 @@ def order_tweets_by_user_in_file(
             i / 4,
             (i / 4) / (seconds_running / 60),
             files_written,
-            av_mem,
+            av_mem/MIL,
         )
         qprint(report, end='\r')
 
+    def _mem_report():
+        av_mem = virtual_memory().available
+        qprint(
+            f"Avail. memory: {av_mem/MIL:,} |"
+            f" Min mem: {min_mem_bytes/MIL:,}\n")
+
     def _dump_file(usr_2_twits_str, files_written):
+        _mem_report()
         fname = os.path.split(fpath)[1]
         fname = fname[:fname.find('.')]
         dump_fpath = '{}/{}_{}_{}.txt.gz'.format(
@@ -127,7 +136,9 @@ def order_tweets_by_user_in_file(
         )
         qprint('\nTweets dumped for the {}-th time into {}'.format(
             files_written + 1, dump_fpath))
+        _mem_report()
 
+    _mem_report()
     with gzip.open(fpath, 'rt') as textf:
         for i, line in enumerate(textf):
             try:
@@ -145,8 +156,6 @@ def order_tweets_by_user_in_file(
                 _report()
                 av_mem = virtual_memory().available
                 if av_mem < min_mem_bytes:
-                    qprint(
-                        f"Avail. memory: {av_mem} | Min mem: {min_mem_bytes}")
                     _dump_file(usr_2_twits_str, files_written)
                     files_written += 1
                     usr_2_twits_str = None
@@ -155,11 +164,7 @@ def order_tweets_by_user_in_file(
                     gc.collect()
                     usr_2_twits_str = SortedDict()
                     av_mem = virtual_memory().available
-                    qprint(
-                        f"Avail. memory: {av_mem} | Min mem: {min_mem_bytes}")
     if len(usr_2_twits_str) > 0:
-        qprint(
-            f"Avail. memory: {av_mem} | Min mem: {min_mem_bytes}")
         _dump_file(usr_2_twits_str, files_written)
         files_written += 1
         usr_2_twits_str = None
@@ -214,6 +219,8 @@ def merge_user_files(dpath):
                 _increment_pointer(i)
             user_count += 1
 
+    gc.collect()
+
     qprint(f"{user_count} twitter7 users dumped into {output_fpath}")
     qprint("Sorting user file...")
     sorted_output_fpath = t7_user_list_fpath_by_dpath(dpath, sorted=True)
@@ -221,7 +228,7 @@ def merge_user_files(dpath):
         input_fpath=output_fpath, output_fpath=sorted_output_fpath)
     qprint("User file sorted!")
     qprint((f"{user_count:,} twitter7 users dumped into {output_fpath}"
-            " and {sorted_output_fpath}"))
+            f" and {sorted_output_fpath}"))
 
 
 def _uname_and_tweets_from_line(line):
@@ -347,3 +354,5 @@ def phase1(output_dpath, tpath=None, subphases=None):
             "Finished running phase 1 of the twikwak17 pipeline.\n"
             "Run duration: {}".format(seconds_to_duration_str(end - start))
         ))
+    set_output_report_file_handle(None)
+    create_timestamped_report_file_copy(output_report_fpath)

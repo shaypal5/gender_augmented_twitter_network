@@ -20,11 +20,27 @@ from twikwak17.shared import (
 )
 
 
-def _uname_and_tweets_from_line(line):
+UNAME_REGEX = '\s*\S+'
+
+
+def uname_and_tweets_from_line(line):
+    """Breaks down a twitter7 merged-by-user line into user and tweets.
+
+    Parameters
+    ----------
+    line : str
+        A twitter7 merged-by-user line of the format:
+        "_some_usernAme contents of tweets i love fish"
+
+    Returns
+    -------
+    user, tweets : str, str
+        A 2-tuple of the user name string and a string of all tweets.
+    """
     if len(line) < 1:
         return None, None
-    ix = line.find(' ')
-    return line[0:ix], line[ix+1:]
+    user = re.findall(UNAME_REGEX, line)[0]
+    return user, line[len(user)+1:]
 
 
 def gender_classify_users_in_intersection_by_twitter7(
@@ -57,18 +73,22 @@ def gender_classify_users_in_intersection_by_twitter7(
         intrsct_f = stack.enter_context(
             gzip.open(user_intersection_fpath, 'rt'))
         out_f = stack.enter_context(gzip.open(output_fpath, 'wt'))
-        uname_regex = '[^\s]+'
+        t7_lines_read = 0
+        intersection_lines_read = 0
         users_read = 0
         users_matched = 0
         users_dumped = 0
         users_and_genders_to_dump = []
 
         t7_line = tweets_f.readline()
+        t7_lines_read += 1
         intrsct_line = intrsct_f.readline()
+        intersection_lines_read += 1
 
         while t7_line and intrsct_line:
-            t7_user, tweets = _uname_and_tweets_from_line(tweets_f.readline())
-            list_user = re.findall(uname_regex, intrsct_line)[0]
+            t7_user, tweets = uname_and_tweets_from_line(t7_line)
+            list_user = re.findall(UNAME_REGEX, intrsct_line)[0]
+            list_user = list_user.lower()
             if t7_user == list_user:
                 gender = predict_gender_by_tweets(tweets)
                 users_and_genders_to_dump.append(f"{t7_user} {gender}")
@@ -81,21 +101,28 @@ def gender_classify_users_in_intersection_by_twitter7(
                     gc.collect()
                     users_and_genders_to_dump = []
                 t7_line = tweets_f.readline()
+                t7_lines_read += 1
                 intrsct_line = intrsct_f.readline()
+                intersection_lines_read += 1
             elif t7_user < list_user:
                 t7_line = tweets_f.readline()
+                t7_lines_read += 1
             else:
                 intrsct_line = intrsct_f.readline()
+                intersection_lines_read += 1
             users_read += 1
-            if users_read % 10000 == 0:
-                print(f"{users_read} users read; {users_matched} matched",
-                      end="\r")
+            if users_read % 5000 == 0:
+                qprint((
+                    f"{t7_lines_read:,} t7 lines read|"
+                    f"{intersection_lines_read:,} ∩ lines read|"
+                    f"{users_read:,} users read; {users_matched:,} matched|"
+                    f"{t7_user} ~ {list_user}"))
             # if users_read % 100000 == 0:
             #     print(f"|{t7_user}|{list_user}")
         if len(users_and_genders_to_dump) > 0:
             out_f.writelines(users_and_genders_to_dump)
             users_dumped += len(users_and_genders_to_dump)
-        return users_dumped
+        return int(users_dumped)
 
 
 def phase4(phase1_output_dpath, phase3_output_dpath, phase4_output_dpath):
@@ -112,7 +139,7 @@ def phase4(phase1_output_dpath, phase3_output_dpath, phase4_output_dpath):
     """
     start = time.time()
     t7_tweets_by_user_fpath = twitter7_tweet_list_fpath_by_dpath(
-        phase1_output_dpath, sorted=True)
+        phase1_output_dpath, sorted=False)
     user_intersection_fpath = uname_intersection_fpath_by_dpath(
         phase3_output_dpath)
     output_fpath = uname_to_gender_map_fpath_by_dpath(phase4_output_dpath)
@@ -132,13 +159,14 @@ def phase4(phase1_output_dpath, phase3_output_dpath, phase4_output_dpath):
             output_fpath,
         )
 
-        qprint(
-            f"{user_count} users gender classified; dumped to {output_fpath}.")
+        qprint((
+            f"{user_count:,} users gender classified;"
+            f" dumped to {output_fpath}."))
 
         end = time.time()
         qprint((
             "Finished running phase 4 of the twikwak17 pipeline.\n"
             "Run duration: {}".format(seconds_to_duration_str(end - start))
         ))
-        set_output_report_file_handle(None)
-        create_timestamped_report_file_copy(output_report_fpath)
+    set_output_report_file_handle(None)
+    create_timestamped_report_file_copy(output_report_fpath)
