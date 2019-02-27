@@ -1,4 +1,4 @@
-"""Phase 1 of the twikwak17 dataset generation process."""
+"""Phase 5 of the twikwak17 dataset generation process."""
 
 import re
 import gc
@@ -72,7 +72,7 @@ def gender_classify_users_in_intersection_by_twitter7(
             gzip.open(twitter7_tweets_by_user_fpath, 'rt'))
         intrsct_f = stack.enter_context(
             gzip.open(user_intersection_fpath, 'rt'))
-        out_f = stack.enter_context(gzip.open(output_fpath, 'wt+'))
+        out_f = stack.enter_context(gzip.open(output_fpath, 'wt'))
         t7_lines_read = 0
         intersection_lines_read = 0
         users_read = 0
@@ -94,8 +94,7 @@ def gender_classify_users_in_intersection_by_twitter7(
                 users_and_genders_to_dump.append(f"{t7_user} {gender}")
                 users_matched += 1
                 if users_matched % 100000 == 0:
-                    lines = "\n".join(users_and_genders_to_dump) + "\n"
-                    out_f.write(lines)
+                    out_f.writelines(users_and_genders_to_dump)
                     users_dumped += 100000
                     users_and_genders_to_dump = None
                     del users_and_genders_to_dump
@@ -121,10 +120,9 @@ def gender_classify_users_in_intersection_by_twitter7(
             # if users_read % 100000 == 0:
             #     print(f"|{t7_user}|{list_user}")
         if len(users_and_genders_to_dump) > 0:
-            lines = "\n".join(users_and_genders_to_dump) + "\n"
-            out_f.write(lines)
+            out_f.writelines(users_and_genders_to_dump)
             users_dumped += len(users_and_genders_to_dump)
-    return int(users_dumped)
+        return int(users_dumped)
 
 
 def phase4(phase1_output_dpath, phase3_output_dpath, phase4_output_dpath):

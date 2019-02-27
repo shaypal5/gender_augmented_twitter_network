@@ -218,7 +218,7 @@ def uname_intersection_fpath_by_dpath(dpath):
 
 # --- phase 4 ---
 
-GENDER_MAPPING_FNAME = 'username_to_gender_txt.gz'
+GENDER_MAPPING_FNAME = 'username_to_gender.txt.gz'
 
 
 def uname_to_gender_map_fpath_by_dpath(dpath):
