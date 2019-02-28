@@ -8,6 +8,7 @@ from .phases import (
     phase2,
     phase3,
     phase4,
+    phase5,
 )
 from .shared import (
     CfgKey,
@@ -38,7 +39,7 @@ def run_pipeline(
         The path to the save file of a previous session to continue. If not
         given, a new session is created.
     """
-    phases = ['1', '2', '3']
+    phases = ['1', '2', '3', '4', '5']
     run_phases(
         phases=phases, tpath=tpath, kpath=kpath, output_dpath=output_dpath,
         session_fpath=session_fpath)
@@ -135,6 +136,14 @@ def run_phases(
             phase1_output_dpath=phase1_out_dpath,
             phase3_output_dpath=phase3_out_dpath,
             phase4_output_dpath=phase4_out_dpath,
+        )
+
+    phase5_out_dpath = phase_output_dpath(5, output_dpath)
+    if '5' in phases:
+        phase5(
+            phase2_output_dpath=phase2_out_dpath,
+            phase4_output_dpath=phase4_out_dpath,
+            phase5_output_dpath=phase5_out_dpath,
         )
 
     end = time.time()

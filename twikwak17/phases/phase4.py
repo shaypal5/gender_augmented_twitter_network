@@ -49,7 +49,7 @@ def gender_classify_users_in_intersection_by_twitter7(
 
     Only users in the intersection of the twitter7 and kwak10www datasets are
     classified. The gender of the users is estimated by the content of their
-    tweets in the twitter7 dataset.
+    tweets in the twitter7 dataset using the SPEKS Twitter gender predictor.
 
     Parameters
     ----------
@@ -57,8 +57,8 @@ def gender_classify_users_in_intersection_by_twitter7(
         The full qualified path to the twitter7 tweets-by-user file.
     user_intersection_fpath : str
         The full qualified path to the user list file.
-    output_dpath : str
-        The path to the designated output folder.
+    output_fpath : str
+        The path to the designated output file.
     """
     qprint((
         "\nStarting to classify gender of users in {} by tweets in {}; "

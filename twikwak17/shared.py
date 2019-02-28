@@ -225,6 +225,15 @@ def uname_to_gender_map_fpath_by_dpath(dpath):
     return os.path.join(dpath, GENDER_MAPPING_FNAME)
 
 
+# --- phase 5 ---
+
+UID_TO_GENDER_MAP_FNAME = 'uid_to_gender.txt.gz'
+
+
+def uid_to_gender_map_fpath_by_dpath(dpath):
+    return os.path.join(dpath, UID_TO_GENDER_MAP_FNAME)
+
+
 # === printing ===
 
 QUIET = False

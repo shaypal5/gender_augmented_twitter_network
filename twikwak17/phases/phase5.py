@@ -6,13 +6,12 @@ import time
 import gzip
 from contextlib import ExitStack
 
-from speks import predict_gender_by_tweets
 
 from twikwak17.shared import (
     qprint,
-    twitter7_tweet_list_fpath_by_dpath,
-    uname_intersection_fpath_by_dpath,
+    uname2id_fpath_by_dpath,
     uname_to_gender_map_fpath_by_dpath,
+    uid_to_gender_map_fpath_by_dpath,
     seconds_to_duration_str,
     phase_output_report_fpath,
     set_output_report_file_handle,
@@ -20,152 +19,157 @@ from twikwak17.shared import (
 )
 
 
-UNAME_REGEX = '\s*\S+'
+UNAME_TO_ID_REGEX = '(\s*\S+) (\S+)'
 
 
-def uname_and_tweets_from_line(line):
-    """Breaks down a twitter7 merged-by-user line into user and tweets.
+def get_uname2uid_map(uname2id_fpath):
+    qprint("\nLoading uname2uid map from file...")
+    lines_read = 0
+    matching_lines = 0
+    nonmatching_lines = 0
+    uname2id_map = {}
+    with gzip.open(uname2id_fpath, 'rt') as uname2id_f:
+        for line in uname2id_f:
+            lines_read += 1
+            try:
+                uname, uid = re.findall(UNAME_TO_ID_REGEX, line)[0]
+                uname2id_map[uname] = uid
+                matching_lines += 1
+            except IndexError:
+                nonmatching_lines += 1
+            if lines_read % 100000 == 0:
+                qprint((
+                    f"{lines_read:,} lines read; {matching_lines:,}"
+                    " lines matched."), end='\r')
+    qprint("uname2uid map loaded from file successfully.\n")
+    return uname2id_map
+
+
+UNAME_TO_GENDER_REGEX = '(\s*\S+) ([01])'
+
+
+def uname_and_gender_from_line(line):
+    """Breaks down a uname-to-gender line into username and gender digit.
 
     Parameters
     ----------
     line : str
         A twitter7 merged-by-user line of the format:
-        "_some_usernAme contents of tweets i love fish"
+        "_some_female_usernAme 1"
 
     Returns
     -------
-    user, tweets : str, str
-        A 2-tuple of the user name string and a string of all tweets.
+    user, gender : str, str
+        A 2-tuple of the user name string and a one-character string of the
+        user's predicted gender. E.g. ('_some_female_usernAme", "1")
     """
     if len(line) < 1:
         return None, None
-    user = re.findall(UNAME_REGEX, line)[0]
-    return user, line[len(user)+1:]
+    user, gender = re.findall(UNAME_TO_GENDER_REGEX, line)[0]
+    return user, gender
 
 
-def gender_classify_users_in_intersection_by_twitter7(
-        twitter7_tweets_by_user_fpath, user_intersection_fpath, output_fpath):
-    """Gender classifies twitter users by the content of their tweets.
-
-    Only users in the intersection of the twitter7 and kwak10www datasets are
-    classified. The gender of the users is estimated by the content of their
-    tweets in the twitter7 dataset.
+def convert_uname2gender_map_to_uid2gender_map(
+        uname_to_gender_map_fpath, uname2id_fpath, output_fpath):
+    """Converts a username-to-gender mapping file to a user-id-to-gender one.
 
     Parameters
     ----------
-    twitter7_tweets_by_user_fpath : str
-        The full qualified path to the twitter7 tweets-by-user file.
-    user_intersection_fpath : str
-        The full qualified path to the user list file.
-    output_dpath : str
-        The path to the designated output folder.
+    uname_to_gender_map_fpath : str
+        The full qualified path to the username-to-gender file.
+    uname2id_fpath : str
+        The full qualified path to the username to user id mapping file.
+    output_fpath : str
+        The path to the designated output file.
     """
     qprint((
-        "\nStarting to classify gender of users in {} by tweets in {}; "
-        "Dumping into {}."
-    ).format(
-        user_intersection_fpath, twitter7_tweets_by_user_fpath,
-        output_fpath,
+        "\nStarting to convert username-to-gender mapping in "
+        f"{uname_to_gender_map_fpath} to a user-id-to-gender mapping using "
+        f"uname-to-id map {uname2id_fpath}. Writing result to {output_fpath}."
     ))
+    uname2id = get_uname2uid_map(uname2id_fpath)
     with ExitStack() as stack:
-        tweets_f = stack.enter_context(
-            gzip.open(twitter7_tweets_by_user_fpath, 'rt'))
-        intrsct_f = stack.enter_context(
-            gzip.open(user_intersection_fpath, 'rt'))
-        out_f = stack.enter_context(gzip.open(output_fpath, 'wt'))
-        t7_lines_read = 0
-        intersection_lines_read = 0
-        users_read = 0
-        users_matched = 0
-        users_dumped = 0
-        users_and_genders_to_dump = []
+        uname2g_f = stack.enter_context(
+            gzip.open(uname_to_gender_map_fpath, 'rt'))
+        out_f = stack.enter_context(gzip.open(output_fpath, 'wt+'))
+        lines_read = 0
+        lines_dumped = 0
+        users_not_found = 0
+        lines_to_dump = []
 
-        t7_line = tweets_f.readline()
-        t7_lines_read += 1
-        intrsct_line = intrsct_f.readline()
-        intersection_lines_read += 1
+        uname2gender_line = uname2g_f.readline()
+        lines_read += 1
 
-        while t7_line and intrsct_line:
-            t7_user, tweets = uname_and_tweets_from_line(t7_line)
-            list_user = re.findall(UNAME_REGEX, intrsct_line)[0]
-            list_user = list_user.lower()
-            if t7_user == list_user:
-                gender = predict_gender_by_tweets(tweets)
-                users_and_genders_to_dump.append(f"{t7_user} {gender}")
-                users_matched += 1
-                if users_matched % 100000 == 0:
-                    out_f.writelines(users_and_genders_to_dump)
-                    users_dumped += 100000
-                    users_and_genders_to_dump = None
-                    del users_and_genders_to_dump
+        while uname2gender_line:
+            uname, gender = uname_and_gender_from_line(uname2gender_line)
+            try:
+                uid = uname2id[uname]
+                lines_to_dump.append(f"{uid} {gender}")
+                if len(lines_to_dump) >= 100000:
+                    lines = "\n".join(lines_to_dump) + "\n"
+                    out_f.write(lines)
+                    lines_dumped += 100000
+                    lines_to_dump = None
+                    del lines_to_dump
                     gc.collect()
-                    users_and_genders_to_dump = []
-                t7_line = tweets_f.readline()
-                t7_lines_read += 1
-                intrsct_line = intrsct_f.readline()
-                intersection_lines_read += 1
-            elif t7_user < list_user:
-                t7_line = tweets_f.readline()
-                t7_lines_read += 1
-            else:
-                intrsct_line = intrsct_f.readline()
-                intersection_lines_read += 1
-            users_read += 1
-            if users_read % 5000 == 0:
+                    lines_to_dump = []
+            except KeyError:
+                users_not_found += 1
+            uname2gender_line = uname2g_f.readline()
+            lines_read += 1
+            if lines_read % 10000 == 0:
                 qprint((
-                    f"{t7_lines_read:,} t7 lines read|"
-                    f"{intersection_lines_read:,} ∩ lines read|"
-                    f"{users_read:,} users read; {users_matched:,} matched|"
-                    f"{t7_user} ~ {list_user}"))
-            # if users_read % 100000 == 0:
-            #     print(f"|{t7_user}|{list_user}")
-        if len(users_and_genders_to_dump) > 0:
-            out_f.writelines(users_and_genders_to_dump)
-            users_dumped += len(users_and_genders_to_dump)
-        return int(users_dumped)
+                    f"{lines_read:,} lines read|"
+                    f"{lines_dumped:,} lines dumped|"
+                    f"{users_not_found:,} users not found. {uname} ~ {uid}"))
+        if len(lines_to_dump) > 0:
+            lines = "\n".join(lines_to_dump) + "\n"
+            out_f.write(lines)
+            lines_dumped += len(lines_to_dump)
+        return int(lines_to_dump)
 
 
-def phase4(phase1_output_dpath, phase3_output_dpath, phase4_output_dpath):
+def phase5(phase2_output_dpath, phase4_output_dpath, phase5_output_dpath):
     """Build a sorted username list of the intersection of twitter7 and kwak10.
 
     Parameters
     ----------
-    phase1_output_dpath : str
-        The path to the output directory of phase 1.
-    phase3_output_dpath : str
-        The path to the output directory of phase 3.
+    phase2_output_dpath : str
+        The path to the output directory of phase 2.
     phase4_output_dpath : str
-        The path to the output directory of this phase, phase 4.
+        The path to the output directory of phase 4.
+    phase5_output_dpath : str
+        The path to the output directory of this phase, phase 5.
     """
     start = time.time()
-    t7_tweets_by_user_fpath = twitter7_tweet_list_fpath_by_dpath(
-        phase1_output_dpath, sorted=False)
-    user_intersection_fpath = uname_intersection_fpath_by_dpath(
-        phase3_output_dpath)
-    output_fpath = uname_to_gender_map_fpath_by_dpath(phase4_output_dpath)
-    output_report_fpath = phase_output_report_fpath(4, phase4_output_dpath)
+    uname2id_fpath = uname2id_fpath_by_dpath(
+        phase2_output_dpath)
+    uname_to_gender_map_fpath = uname_to_gender_map_fpath_by_dpath(
+        phase4_output_dpath)
+    output_fpath = uid_to_gender_map_fpath_by_dpath(phase5_output_dpath)
+    output_report_fpath = phase_output_report_fpath(5, phase5_output_dpath)
 
     with open(output_report_fpath, 'wt+') as output_report_f:
         set_output_report_file_handle(output_report_f)
-        qprint("\n\n====== PHASE 4 =====")
+        qprint("\n\n====== PHASE 5 =====")
         qprint((
-            f"Starting phase 4 from \n{t7_tweets_by_user_fpath} and "
-            f"\n{user_intersection_fpath} \ninput files to {output_fpath} "
+            f"Starting phase 5 from \n{uname2id_fpath} and "
+            f"\n{uname_to_gender_map_fpath} \ninput files to {output_fpath} "
             "output file."))
 
-        user_count = gender_classify_users_in_intersection_by_twitter7(
-            t7_tweets_by_user_fpath,
-            user_intersection_fpath,
-            output_fpath,
+        user_count = convert_uname2gender_map_to_uid2gender_map(
+            uname_to_gender_map_fpath=uname_to_gender_map_fpath,
+            uname2id_fpath=uname2id_fpath,
+            output_fpath=output_fpath,
         )
 
         qprint((
-            f"{user_count:,} users gender classified;"
-            f" dumped to {output_fpath}."))
+            f"Translated username to uid of {user_count:,} users in"
+            f" username-to-gender map; dumped to {output_fpath}."))
 
         end = time.time()
         qprint((
-            "Finished running phase 4 of the twikwak17 pipeline.\n"
+            "Finished running phase 5 of the twikwak17 pipeline.\n"
             "Run duration: {}".format(seconds_to_duration_str(end - start))
         ))
     set_output_report_file_handle(None)
