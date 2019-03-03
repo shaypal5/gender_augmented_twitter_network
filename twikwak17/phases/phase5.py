@@ -126,7 +126,7 @@ def convert_uname2gender_map_to_uid2gender_map(
             lines = "\n".join(lines_to_dump) + "\n"
             out_f.write(lines)
             lines_dumped += len(lines_to_dump)
-        return int(lines_to_dump)
+        return int(lines_dumped)
 
 
 def phase5(phase2_output_dpath, phase4_output_dpath, phase5_output_dpath):
