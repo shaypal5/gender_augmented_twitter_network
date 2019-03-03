@@ -30,7 +30,7 @@ BYTES_IN_MB = 1000000
 MIN_AVAIL_MEM_MB_DEF = 500
 USR_FNAME_MARKER = 'p2usr'
 LINE_DUMP_FREQ = 5000000
-UNAME2ID_REGEX = '(.+) ([0-9]+)'
+UNAME2ID_REGEX = '(\s*\S+) ([0-9]+)'
 
 
 def _dump_uname2id(uname_2_id, files_written, output_dpath):
@@ -52,6 +52,10 @@ def inverse_numeric2screen_into_multiple_files(output_dpath, kpath):
             match_groups = re.match(LINE_REGEX, line).groups()
             uid = match_groups[0]
             uname = match_groups[1]
+            try:
+                uname = uname.lower()
+            except AttributeError:
+                pass
             uname_to_id[uname] = uid
             i += 1
             if i % 10000 == 0:
@@ -90,6 +94,7 @@ def merge_user_files(input_dpath, uname_fpath, uname2id_fpath, output_dpath):
             match_groups = re.match(UNAME2ID_REGEX, min_line.replace('\n', ''))
             try:
                 min_usr, min_id = match_groups[1], match_groups[2]
+                min_usr = min_usr.lower()
             except TypeError:
                 min_usr = DONE_MARKER
                 min_id = 0
