@@ -100,8 +100,8 @@ An example line might look like:
 
 The final output thus consists of two files:
 
-* ``twikwak_social_graph.txt.gz`` - The social graph of all *twikwak17* users. This is a sub-graph of *kwak10www* social graph component; a projection of it into the intersection between the *kwak10www* user set and the *twitter7* user set.
-* ``twikwak_uid_to_gender.txt.gz`` - A user-id to (estimated) gender map for the *twikwak17* user set.
+* ``twikwak17_social_graph.txt.gz`` - The social graph of all *twikwak17* users. This is a sub-graph of *kwak10www* social graph component; a projection of it into the intersection between the *kwak10www* user set and the *twitter7* user set.
+* ``twikwak17_uid_to_gender.txt.gz`` - A user-id to (estimated) gender map for the *twikwak17* user set.
 
 
 License
