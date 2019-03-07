@@ -46,6 +46,16 @@ Dependencies
 * `SPEKS <https://github.com/shaypal5/speks>`_ - Text-based gender prediction for Twitter in Python (a Python 3 packaging I wrote for other people's code).
 
 
+Use
+---
+
+The code used to generate the *twikwak17* dataset is packaged in a Python package named ``twikwak17``. You can install this package by running the ``pip install twikwak17`` command from anywhere in your system (to install the package from the global PyPI server), or install it from source by running the ``pip install .`` command from the root directory of a local clone of this reporsitory on your system.
+
+Once installed, you can run the generation process - and related operations, like running parts of the genration process or generating samples of the source datasets - by using the newly installed ``twikwak`` command. Run ``twikwak --help`` to see the possible sub-commands and how to use the tool.
+
+You can, of course, only generate the dataset yourself assuming you have the two source datasets. In any case, I would recommend downloading the generated dataset (see the download section) rather than generating it yourself.
+
+
 Process
 -------
 
