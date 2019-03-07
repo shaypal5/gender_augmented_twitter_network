@@ -91,6 +91,12 @@ An example line might look like:
 6. Finally, the sixth stage runs through the social graph file of the *kwak10www* dataset (``twitter_rv.zip``) and removes any links/edges where at least one of the nodes is not the intersection list.
 
 
+The final output thus consists of two files:
+
+  * ``twikwak_social_graph`` - The social graph of all twikwak17 users. This is a sub-graph of *kwak10www* social graph component; a projection of it into the intersection between the *kwak10www* user set and the *twitter7* user set.
+  * ``twikwak_uid_to_gender`` - A user-id to (estimated) gender map for the *twikwak17* user set.
+
+
 Complexity
 ----------
 
