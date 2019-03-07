@@ -92,6 +92,8 @@ def convert_uname2gender_map_to_uid2gender_map(
         uname2g_f = stack.enter_context(
             gzip.open(uname_to_gender_map_fpath, 'rt'))
         out_f = stack.enter_context(gzip.open(output_fpath, 'wt+'))
+        uname = None
+        uid = None
         lines_read = 0
         lines_dumped = 0
         users_not_found = 0

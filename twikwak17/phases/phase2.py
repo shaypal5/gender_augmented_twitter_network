@@ -30,7 +30,7 @@ BYTES_IN_MB = 1000000
 MIN_AVAIL_MEM_MB_DEF = 500
 USR_FNAME_MARKER = 'p2usr'
 LINE_DUMP_FREQ = 5000000
-UNAME2ID_REGEX = '(\s*\S+) ([0-9]+)'
+UNAME2ID_REGEX = '(.+) ([0-9]+)'
 
 
 def _dump_uname2id(uname_2_id, files_written, output_dpath):
@@ -52,10 +52,7 @@ def inverse_numeric2screen_into_multiple_files(output_dpath, kpath):
             match_groups = re.match(LINE_REGEX, line).groups()
             uid = match_groups[0]
             uname = match_groups[1]
-            try:
-                uname = uname.lower()
-            except AttributeError:
-                pass
+            uname = uname.lower()
             uname_to_id[uname] = uid
             i += 1
             if i % 10000 == 0:
@@ -181,5 +178,5 @@ def phase2(output_dpath, kpath=None, subphases=None):
             "Finished running phase 2 of the twikwak17 pipeline.\n"
             "Run duration: {}".format(seconds_to_duration_str(end - start))
         ))
-        set_output_report_file_handle(None)
-        create_timestamped_report_file_copy(output_report_fpath)
+    set_output_report_file_handle(None)
+    create_timestamped_report_file_copy(output_report_fpath)
