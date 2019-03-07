@@ -23,9 +23,11 @@ The *twikwak17* dataset consists of two files:
 Stats
 -----
 
-* The number of nodes in the dataset (as it is the number if users in the intersection of the *twitter7* dataset and the *kwak10www* dataset) is 2,996,026.
+* The number of nodes in the dataset is 8,221,921.
 
-Node intersection, resulting network size, etc..
+  * That is, of course, the number of users in the intersection of the *twitter7* dataset and the *kwak10www* dataset.
+
+* The number of edges in the network is TODO.
 
 Etymology
 ---------
