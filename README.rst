@@ -12,11 +12,13 @@ This repository contains *twikwak17*, a gender-augmented Twitter network dataset
 The Dataset
 ===========
 
-Etymology
+Structure
 ---------
 
-The generation process of this dataset depends on two existing datasets, *kwak10www* and *twitter7* (see `Dependencies`_ for more information), and so the amelgamation of both names into *twikwak17* was chosen.
+The *twikwak17* dataset consists of two files:
 
+* ``twikwak17_social_graph.txt.gz`` - The social graph of all *twikwak17* users.
+* ``twikwak17_uid_to_gender.txt.gz`` - A user-id to (estimated) gender map for the *twikwak17* user set.
 
 Stats
 -----
@@ -24,6 +26,11 @@ Stats
 * The number of nodes in the dataset (as it is the number if users in the intersection of the *twitter7* dataset and the *kwak10www* dataset) is 2,996,026.
 
 Node intersection, resulting network size, etc..
+
+Etymology
+---------
+
+The generation process of this dataset depends on two existing datasets, *kwak10www* and *twitter7* (see `Dependencies`_ for more information), and so the amelgamation of both names into *twikwak17* was chosen.
 
 
 Generation
@@ -77,7 +84,7 @@ The generation process is composed of several stages:
 
 3. The third stage merges the two sorted lists of user handles (``twitter7_user_list.txt.gz`` and ``kwak10_unames.txt.gz``) to create a lexicographically sorted list of the intersection between the two lists. 
 
-4. The fourth stage runs each line - in the twitter7 user-wise merged tweets files - belonging to a user in the intersection list through the `SPEKS gender predictor for Twitter <https://github.com/shaypal5/speks>`_, and generates a lexicographically sorted user-handle-to-gender mapping. Gender is indicated by a single digit; 0 is a prediction of male, 1 is a prediction of female.
+4. The fourth stage runs each line - in the *twitter7* user-wise merged tweets files - belonging to a user in the intersection list through the `SPEKS gender predictor for Twitter <https://github.com/shaypal5/speks>`_, and generates a lexicographically sorted user-handle-to-gender mapping. Gender is indicated by a single digit; 0 is a prediction of male, 1 is a prediction of female.
 
 An example line might look like:
 
@@ -93,26 +100,8 @@ An example line might look like:
 
 The final output thus consists of two files:
 
-  * ``twikwak_social_graph`` - The social graph of all twikwak17 users. This is a sub-graph of *kwak10www* social graph component; a projection of it into the intersection between the *kwak10www* user set and the *twitter7* user set.
-  * ``twikwak_uid_to_gender`` - A user-id to (estimated) gender map for the *twikwak17* user set.
-
-
-Complexity
-----------
-
-Define ``l7`` to be the number of lines in the *twitter7* dataset and ``u7`` to be the number of users in it. Define ``u10`` to be the number of users in the *kwak10www* dataset and ``l10`` the number of lines (i.e. edges) in it. Finally, define ``u`` to be the number of users in the intersection of both user lists.
-
-1. Phase 1 runs in :math:`O(u7 log(u7)+l7+u7) ~ O(u7 log(u7))`, as it reads through ``l7`` lines once, and writes ``u7`` lines to disk.
-
-2. Phase 2 runs in :math:`O(u10 log(u10))`, as it reads through ``u10`` lines once, sorts them in-memory in :math:`O(u10 log u10)` and writes ``u10`` lines.
-
-3. Phase 3 runs in :math:`O(u7+u10)`, as it merges two sorted lists in time :math:`O(u7+u10)` and write ``u`` lines to disk.
-
-4. Phase 4 runs in :math:`O(u)`, as it calls the gender prediction algorithm ``u`` times and writes ``u`` lines to disk.
-
-5. Phase 5 runs in :math:`O(u)`, as it performs a single pass through a ``u``-lines-long file and writes ``u`` lines to disk.
-
-6. Phase 6 runs in :math:`O(l10 * log(u))`, as it reads ``l10`` lines, performs ``l1`` searches in a ``u``-sized hash table, and writes ``l10`` lines to disk.
+* ``twikwak_social_graph.txt.gz`` - The social graph of all *twikwak17* users. This is a sub-graph of *kwak10www* social graph component; a projection of it into the intersection between the *kwak10www* user set and the *twitter7* user set.
+* ``twikwak_uid_to_gender.txt.gz`` - A user-id to (estimated) gender map for the *twikwak17* user set.
 
 
 License
