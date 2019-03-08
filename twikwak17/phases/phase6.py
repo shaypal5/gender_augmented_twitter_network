@@ -4,6 +4,7 @@ import re
 import gc
 import time
 import gzip
+import zipfile
 from contextlib import ExitStack
 
 
@@ -19,7 +20,7 @@ from twikwak17.shared import (
 )
 
 
-UID_TO_GENDER_REGEX = '(\d+) [01]'
+UID_TO_GENDER_REGEX = '(\d+) ([01])'
 
 
 def get_uid_set(uid2gender_fpath):
@@ -34,16 +35,18 @@ def get_uid_set(uid2gender_fpath):
             lines_read += 1
             try:
                 uid, gender = re.findall(UID_TO_GENDER_REGEX, line)[0]
-                uid_set.add(int(uid))
-                matching_lines += 1
             except IndexError:
                 nonmatching_lines += 1
+            try:
+                uid_set.add(int(uid))
+                matching_lines += 1
             except ValueError:
                 bad_uid_lines += 1
+                print(uid)
             if lines_read % 100000 == 0:
                 qprint((
                     f"{lines_read:,} lines read; {matching_lines:,}"
-                    " lines matched. {bad_uid_lines} bad UIDs."), end='\r')
+                    f" lines matched. {bad_uid_lines} bad UIDs."), end='\r')
 
     qprint("User ID set loaded from file successfully.\n")
     return uid_set
@@ -79,7 +82,8 @@ def project_edge_list_to_user_intersection(
     qprint("Starting to run through social graph file...")
     uid_set = get_uid_set(uid2gender_fpath)
     with ExitStack() as stack:
-        twitter_rv_f = stack.enter_context(gzip.open(twitter_rv_fpath, 'rt'))
+        twitter_rv_f = stack.enter_context(
+            zipfile.open(twitter_rv_fpath, 'rt'))
         out_f = stack.enter_context(gzip.open(output_fpath, 'wt+'))
         uid1, uid2 = None, None
         lines_read = 0
