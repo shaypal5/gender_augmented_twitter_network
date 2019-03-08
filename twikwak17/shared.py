@@ -131,6 +131,13 @@ def kwak10_dpath():
     return TWIK_CFG.get(CfgKey.KWAK10_DPATH, None)
 
 
+TWITTER_RV_FNAME = 'twitter_rv.zip'
+
+
+def kwak10_twitter_rv_fpath():
+    return os.path.join(kwak10_dpath(), TWITTER_RV_FNAME)
+
+
 DEF_SAMPLE_DNAME_TEMPLATE = 'sample_files'
 
 
@@ -232,6 +239,15 @@ UID_TO_GENDER_MAP_FNAME = 'uid_to_gender.txt.gz'
 
 def uid_to_gender_map_fpath_by_dpath(dpath):
     return os.path.join(dpath, UID_TO_GENDER_MAP_FNAME)
+
+
+# --- phase 6 ---
+
+SOCIAL_GRAPH_FNAME = 'social_graph.txt.gz'
+
+
+def social_graph_fpath_by_dpath(dpath):
+    return os.path.join(dpath, SOCIAL_GRAPH_FNAME)
 
 
 # === printing ===
