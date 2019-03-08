@@ -52,6 +52,13 @@ def get_uid_set(uid2gender_fpath):
 UID_TO_UID_REGEX = '(\d+) (\d+)'
 
 
+def uids_from_edge_line(line):
+    if len(line) < 1:
+        return None, None
+    uid, uid = re.findall(UID_TO_UID_REGEX, line)[0]
+    return uid, uid
+
+
 def project_edge_list_to_user_intersection(
         twitter_rv_fpath, uid2gender_fpath, output_fpath):
     """Projects a user-to-user edge list to a given user intersection list.
@@ -69,9 +76,46 @@ def project_edge_list_to_user_intersection(
     output_fpath : str
         The path to the designated output file.
     """
+    qprint("Starting to run through social graph file...")
     uid_set = get_uid_set(uid2gender_fpath)
     with ExitStack() as stack:
-        pass
+        twitter_rv_f = stack.enter_context(gzip.open(twitter_rv_fpath, 'rt'))
+        out_f = stack.enter_context(gzip.open(output_fpath, 'wt+'))
+        uid1, uid2 = None, None
+        lines_read = 0
+        lines_dumped = 0
+        edges_thrown = 0
+        lines_to_dump = []
+
+        edge_line = twitter_rv_f.readline()
+        lines_read += 1
+
+        while edge_line:
+            uid1, uid2 = uids_from_edge_line(edge_line)
+            if (uid1 in uid_set) and (uid2 in uid_set):
+                lines_to_dump.append(f"{uid1} {uid2}")
+            else:
+                edges_thrown += 1
+            if len(lines_to_dump) >= 100000:
+                lines = "\n".join(lines_to_dump) + "\n"
+                out_f.write(lines)
+                lines_dumped += 100000
+                lines_to_dump = None
+                del lines_to_dump
+                gc.collect()
+                lines_to_dump = []
+            edge_line = twitter_rv_f.readline()
+            lines_read += 1
+            if lines_read % 10000 == 0:
+                qprint((
+                    f"{lines_read:,} lines read|"
+                    f"{lines_dumped:,} lines dumped|"
+                    f"{edges_thrown:,} edges thrown. {uid1} ~ {uid2}"))
+        if len(lines_to_dump) > 0:
+            lines = "\n".join(lines_to_dump) + "\n"
+            out_f.write(lines)
+            lines_dumped += len(lines_to_dump)
+        return int(lines_dumped)
 
 
 def phase6(phase5_output_dpath, phase6_output_dpath):
