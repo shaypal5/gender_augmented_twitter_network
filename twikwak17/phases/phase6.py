@@ -52,7 +52,7 @@ def get_uid_set(uid2gender_fpath):
     return uid_set
 
 
-UID_TO_UID_REGEX = '(\d+) (\d+)'
+UID_TO_UID_REGEX = '(\d+)[\t\s]+(\d+)'
 
 
 def uids_from_edge_line(line):
@@ -68,7 +68,7 @@ def project_edge_list_to_user_intersection(
 
     All edges between one (or two) users who cannot be found in the given user
     intersection list are removed in the new version of the user-to-user edge
-    list file created.
+    list file created.  d.
 
     Parameters
     ----------
@@ -82,8 +82,10 @@ def project_edge_list_to_user_intersection(
     qprint("Starting to run through social graph file...")
     uid_set = get_uid_set(uid2gender_fpath)
     with ExitStack() as stack:
+        twitter_rv_z = stack.enter_context(
+            zipfile.ZipFile(twitter_rv_fpath, 'rt'))
         twitter_rv_f = stack.enter_context(
-            zipfile.open(twitter_rv_fpath, 'rt'))
+            twitter_rv_z.open('twitter_rv.net'))
         out_f = stack.enter_context(gzip.open(output_fpath, 'wt+'))
         uid1, uid2 = None, None
         lines_read = 0
