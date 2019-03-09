@@ -59,7 +59,7 @@ def uids_from_edge_line(line):
     if len(line) < 1:
         return None, None
     uid, uid = re.findall(UID_TO_UID_REGEX, line)[0]
-    return uid, uid
+    return int(uid), int(uid)
 
 
 def project_edge_list_to_user_intersection(
@@ -83,9 +83,9 @@ def project_edge_list_to_user_intersection(
     uid_set = get_uid_set(uid2gender_fpath)
     with ExitStack() as stack:
         twitter_rv_z = stack.enter_context(
-            zipfile.ZipFile(twitter_rv_fpath, 'rt'))
+            zipfile.ZipFile(twitter_rv_fpath, 'r'))
         twitter_rv_f = stack.enter_context(
-            twitter_rv_z.open('twitter_rv.net'))
+            twitter_rv_z.open('twitter_rv.net', 'r'))
         out_f = stack.enter_context(gzip.open(output_fpath, 'wt+'))
         uid1, uid2 = None, None
         lines_read = 0
@@ -97,7 +97,8 @@ def project_edge_list_to_user_intersection(
         lines_read += 1
 
         while edge_line:
-            uid1, uid2 = uids_from_edge_line(edge_line)
+            edge_str = edge_line.decode("utf-8")
+            uid1, uid2 = uids_from_edge_line(edge_str)
             if (uid1 in uid_set) and (uid2 in uid_set):
                 lines_to_dump.append(f"{uid1} {uid2}")
             else:
