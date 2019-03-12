@@ -117,12 +117,13 @@ def project_edge_list_to_user_intersection(
                 qprint((
                     f"{lines_read:,} lines read|"
                     f"{lines_dumped:,} lines dumped|"
-                    f"{edges_thrown:,} edges thrown. {uid1} ~ {uid2}"))
+                    f"{edges_thrown:,} edges thrown. {uid1} ~ {uid2}"),
+                    end='\r')
         if len(lines_to_dump) > 0:
             lines = "\n".join(lines_to_dump) + "\n"
             out_f.write(lines)
             lines_dumped += len(lines_to_dump)
-        return int(lines_dumped)
+        return int(edges_thrown), int(lines_dumped)
 
 
 def phase6(phase5_output_dpath, phase6_output_dpath):
