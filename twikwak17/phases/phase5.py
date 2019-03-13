@@ -12,6 +12,7 @@ from twikwak17.shared import (
     uname2id_fpath_by_dpath,
     uname_to_gender_map_fpath_by_dpath,
     uid_to_gender_map_fpath_by_dpath,
+    uid_list_fpath_by_dpath,
     seconds_to_duration_str,
     phase_output_report_fpath,
     set_output_report_file_handle,
@@ -70,7 +71,8 @@ def uname_and_gender_from_line(line):
 
 
 def convert_uname2gender_map_to_uid2gender_map(
-        uname_to_gender_map_fpath, uname2id_fpath, output_fpath):
+        uname_to_gender_map_fpath, uname2id_fpath, uid2gender_fpath,
+        uid_list_fpath):
     """Converts a username-to-gender mapping file to a user-id-to-gender one.
 
     Parameters
@@ -79,25 +81,30 @@ def convert_uname2gender_map_to_uid2gender_map(
         The full qualified path to the username-to-gender file.
     uname2id_fpath : str
         The full qualified path to the username to user id mapping file.
-    output_fpath : str
-        The path to the designated output file.
+    uid2gender_fpath : str
+        The path to the designated uid-to-gender map output file.
+    uid_list_fpath : str
+        The path to the designated uid list output file.
     """
     qprint((
         "\nStarting to convert username-to-gender mapping in "
         f"{uname_to_gender_map_fpath} to a user-id-to-gender mapping using "
-        f"uname-to-id map {uname2id_fpath}. Writing result to {output_fpath}."
+        f"uname-to-id map {uname2id_fpath}. Writing result to "
+        "{uid2gender_fpath} and {uid_list_fpath}."
     ))
     uname2id = get_uname2uid_map(uname2id_fpath)
     with ExitStack() as stack:
         uname2g_f = stack.enter_context(
             gzip.open(uname_to_gender_map_fpath, 'rt'))
-        out_f = stack.enter_context(gzip.open(output_fpath, 'wt+'))
+        uid2gender_f = stack.enter_context(gzip.open(uid2gender_fpath, 'wt+'))
+        uid_list_f = stack.enter_context(gzip.open(uid_list_fpath, 'wt+'))
         uname = None
         uid = None
         lines_read = 0
         lines_dumped = 0
         users_not_found = 0
-        lines_to_dump = []
+        map_lines_to_dump = []
+        list_lines_to_dump = []
 
         uname2gender_line = uname2g_f.readline()
         lines_read += 1
@@ -106,15 +113,22 @@ def convert_uname2gender_map_to_uid2gender_map(
             uname, gender = uname_and_gender_from_line(uname2gender_line)
             try:
                 uid = uname2id[uname]
-                lines_to_dump.append(f"{uid} {gender}")
-                if len(lines_to_dump) >= 100000:
-                    lines = "\n".join(lines_to_dump) + "\n"
-                    out_f.write(lines)
+                map_lines_to_dump.append(f"{uid} {gender}")
+                list_lines_to_dump.append(f"{uid}")
+                if len(map_lines_to_dump) >= 100000:
+                    lines = "\n".join(map_lines_to_dump) + "\n"
+                    uid2gender_f.write(lines)
+                    lines = "\n".join(list_lines_to_dump) + "\n"
+                    uid_list_f.write(lines)
+                    del lines
                     lines_dumped += 100000
-                    lines_to_dump = None
-                    del lines_to_dump
+                    map_lines_to_dump = None
+                    list_lines_to_dump = None
+                    del map_lines_to_dump
+                    del list_lines_to_dump
                     gc.collect()
-                    lines_to_dump = []
+                    map_lines_to_dump = []
+                    list_lines_to_dump = []
             except KeyError:
                 users_not_found += 1
             uname2gender_line = uname2g_f.readline()
@@ -124,10 +138,12 @@ def convert_uname2gender_map_to_uid2gender_map(
                     f"{lines_read:,} lines read|"
                     f"{lines_dumped:,} lines dumped|"
                     f"{users_not_found:,} users not found. {uname} ~ {uid}"))
-        if len(lines_to_dump) > 0:
-            lines = "\n".join(lines_to_dump) + "\n"
-            out_f.write(lines)
-            lines_dumped += len(lines_to_dump)
+        if len(map_lines_to_dump) > 0:
+            lines = "\n".join(map_lines_to_dump) + "\n"
+            uid2gender_f.write(lines)
+            lines = "\n".join(list_lines_to_dump) + "\n"
+            uid_list_f.write(lines)
+            lines_dumped += len(map_lines_to_dump)
         return int(lines_dumped)
 
 
@@ -148,7 +164,8 @@ def phase5(phase2_output_dpath, phase4_output_dpath, phase5_output_dpath):
         phase2_output_dpath)
     uname_to_gender_map_fpath = uname_to_gender_map_fpath_by_dpath(
         phase4_output_dpath)
-    output_fpath = uid_to_gender_map_fpath_by_dpath(phase5_output_dpath)
+    uid2gender_fpath = uid_to_gender_map_fpath_by_dpath(phase5_output_dpath)
+    uid_list_fpath = uid_list_fpath_by_dpath(phase5_output_dpath)
     output_report_fpath = phase_output_report_fpath(5, phase5_output_dpath)
 
     with open(output_report_fpath, 'wt+') as output_report_f:
@@ -156,18 +173,21 @@ def phase5(phase2_output_dpath, phase4_output_dpath, phase5_output_dpath):
         qprint("\n\n====== PHASE 5 =====")
         qprint((
             f"Starting phase 5 from \n{uname2id_fpath} and "
-            f"\n{uname_to_gender_map_fpath} \ninput files to {output_fpath} "
-            "output file."))
+            f"\n{uname_to_gender_map_fpath} \ninput files to "
+            "{uid2gender_fpath} and {uid_list_fpath} output files."))
 
         user_count = convert_uname2gender_map_to_uid2gender_map(
             uname_to_gender_map_fpath=uname_to_gender_map_fpath,
             uname2id_fpath=uname2id_fpath,
-            output_fpath=output_fpath,
+            uid2gender_fpath=uid2gender_fpath,
+            uid_list_fpath=uid_list_fpath,
         )
 
         qprint((
             f"Translated username to uid of {user_count:,} users in"
-            f" username-to-gender map; dumped to {output_fpath}."))
+            f" username-to-gender map; dumped to {uid2gender_fpath}."
+            f" User ID list dumped to {uid_list_fpath}."
+        ))
 
         end = time.time()
         qprint((

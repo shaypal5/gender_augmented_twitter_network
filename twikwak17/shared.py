@@ -241,6 +241,13 @@ def uid_to_gender_map_fpath_by_dpath(dpath):
     return os.path.join(dpath, UID_TO_GENDER_MAP_FNAME)
 
 
+UID_LIST_FNAME = 'uid_list.txt.gz'
+
+
+def uid_list_fpath_by_dpath(dpath):
+    return os.path.join(dpath, UID_LIST_FNAME)
+
+
 # --- phase 6 ---
 
 SOCIAL_GRAPH_FNAME = 'social_graph.txt.gz'
