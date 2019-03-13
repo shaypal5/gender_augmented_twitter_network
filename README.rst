@@ -29,7 +29,7 @@ Stats
 
   * That is, of course, the number of users in the intersection of the *twitter7* dataset and the *kwak10www* dataset.
 
-* The number of edges in the network is TODO.
+* The number of edges in the network is 721,249,141..
 
 Etymology
 ---------
