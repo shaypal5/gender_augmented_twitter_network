@@ -20,9 +20,11 @@ from .shared import (
     seconds_to_duration_str,
     Session,
     uid_to_gender_map_fpath_by_dpath,
+    uid_list_fpath_by_dpath,
     social_graph_fpath_by_dpath,
     output_social_graph_fpath,
     output_uid2gender_fpath,
+    output_uid_list_fpath,
 )
 
 
@@ -160,13 +162,23 @@ def run_phases(
         )
 
     qprint("Copying output files to final output folder...")
+
     uid2gender_fpath = uid_to_gender_map_fpath_by_dpath(phase5_out_dpath)
     target_uid2gender = output_uid2gender_fpath(output_dpath)
     try:
         shutil.copy(uid2gender_fpath, target_uid2gender)
         qprint(f"UID-to-gender map copied to {target_uid2gender}")
     except FileNotFoundError:
-        qprint((f"Social graph file not found in {uid2gender_fpath}."
+        qprint((f"UID-to-gender map file not found in {uid2gender_fpath}."
+                " Copying cancelled."))
+
+    uid_list_fpath = uid_list_fpath_by_dpath(phase5_out_dpath)
+    target_uid_list_fpath = output_uid_list_fpath(output_dpath)
+    try:
+        shutil.copy(uid_list_fpath, target_uid_list_fpath)
+        qprint(f"User ID list copied to {target_uid_list_fpath}")
+    except FileNotFoundError:
+        qprint((f"User ID list file not found in {uid_list_fpath}."
                 " Copying cancelled."))
 
     social_graph_fpath = social_graph_fpath_by_dpath(phase6_out_dpath)

@@ -273,6 +273,13 @@ def output_uid2gender_fpath(output_dpath):
     return os.path.join(output_dpath, OUTPUT_GENDER2UID_FNAME)
 
 
+OUTPUT_UID_LIST_FNAME = 'twikwak17_uid_list.txt.gz'
+
+
+def output_uid_list_fpath(output_dpath):
+    return os.path.join(output_dpath, OUTPUT_UID_LIST_FNAME)
+
+
 # === printing ===
 
 QUIET = False
