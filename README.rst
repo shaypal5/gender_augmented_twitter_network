@@ -17,8 +17,10 @@ Structure
 
 The *twikwak17* dataset consists of two files:
 
+* ``twikwak17_uid_list.txt.gz`` - A list of the ids of the user which make up the *twikwak17* network sample. Gzipped.
 * ``twikwak17_social_graph.txt.gz`` - The social graph of all *twikwak17* users.
 * ``twikwak17_uid_to_gender.txt.gz`` - A user-id to (estimated) gender map for the *twikwak17* user set.
+* ``twikwak17.graphml.gz`` - A `graphml <http://graphml.graphdrawing.org/primer/graphml-primer.html>`_ representation of the *twikwak17* graph, including a ``gender`` node attribute. Gzipped.
 
 Stats
 -----
