@@ -109,7 +109,7 @@ An example line might look like:
 
 6. Finally, the sixth stage runs through the social graph file of the *kwak10www* dataset (``twitter_rv.zip``) and removes any links/edges where at least one of the nodes is not the intersection list.
 
-7. The seventh stage combines the previous output into a single `graphml <http://graphml.graphdrawing.org/primer/graphml-primer.html>`_ object written to the ``twikwak17.graphml.gz`` file.
+7. The seventh stage combines the previous outputs into a single `graphml <http://graphml.graphdrawing.org/primer/graphml-primer.html>`_ object written to the ``twikwak17.graphml.gz`` file.
 
 
 The final output thus consists of four files:
@@ -117,7 +117,7 @@ The final output thus consists of four files:
 * ``twikwak17_uid_list.txt.gz`` - A list of the ids of the user which make up the *twikwak17* network sample. Gzipped.
 * ``twikwak17_social_graph.txt.gz`` - The social graph of all *twikwak17* users. This is a sub-graph of *kwak10www* social graph component; a projection of it into the intersection between the *kwak10www* user set and the *twitter7* user set. Gzipped.
 * ``twikwak17_uid_to_gender.txt.gz`` - A user-id to (estimated) gender map for the *twikwak17* user set. Gzipped.
-* ``twikwak.graphml.gz`` - A `graphml <http://graphml.graphdrawing.org/primer/graphml-primer.html>`_ representation of the *twikwak17* graph, including a ``gender`` node attribute. Gzipped.
+* ``twikwak17.graphml.gz`` - A `graphml <http://graphml.graphdrawing.org/primer/graphml-primer.html>`_ representation of the *twikwak17* graph, including a ``gender`` node attribute. Gzipped.
 
 
 License
