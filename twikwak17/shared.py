@@ -250,6 +250,22 @@ def social_graph_fpath_by_dpath(dpath):
     return os.path.join(dpath, SOCIAL_GRAPH_FNAME)
 
 
+# -- the final output (ta-da-dum-dum-dum!) ---
+
+SOCGRAPH_FNAME = 'twikwak17_social_graph.txt.gz'
+
+
+def output_social_graph_fpath(output_dpath):
+    return os.path.join(output_dpath, SOCGRAPH_FNAME)
+
+
+OUTPUT_GENDER2UID_FNAME = 'twikwak17_uid_to_gender.txt.gz'
+
+
+def output_uid2gender_fpath(output_dpath):
+    return os.path.join(output_dpath, OUTPUT_GENDER2UID_FNAME)
+
+
 # === printing ===
 
 QUIET = False

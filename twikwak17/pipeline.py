@@ -2,6 +2,7 @@
 
 import re
 import time
+import shutil
 
 from .phases import (
     phase1,
@@ -18,6 +19,10 @@ from .shared import (
     qprint,
     seconds_to_duration_str,
     Session,
+    uid_to_gender_map_fpath_by_dpath,
+    social_graph_fpath_by_dpath,
+    output_social_graph_fpath,
+    output_uid2gender_fpath,
 )
 
 
@@ -153,6 +158,26 @@ def run_phases(
             phase5_output_dpath=phase5_out_dpath,
             phase6_output_dpath=phase6_out_dpath,
         )
+
+    qprint("Copying output files to final output folder...")
+    uid2gender_fpath = uid_to_gender_map_fpath_by_dpath(phase5_out_dpath)
+    target_uid2gender = output_uid2gender_fpath(output_dpath)
+    try:
+        shutil.copy(uid2gender_fpath, target_uid2gender)
+        qprint(f"UID-to-gender map copied to {target_uid2gender}")
+    except FileNotFoundError:
+        qprint((f"Social graph file not found in {uid2gender_fpath}."
+                " Copying cancelled."))
+
+    social_graph_fpath = social_graph_fpath_by_dpath(phase6_out_dpath)
+    target_socgraph_fpath = output_social_graph_fpath(output_dpath)
+    try:
+        shutil.move(social_graph_fpath, target_socgraph_fpath)
+        qprint(f"Social graph moved to {target_socgraph_fpath}")
+    except FileNotFoundError:
+        qprint((f"Social graph file not found in {social_graph_fpath}."
+                " Either is was not generated or was already moved."
+                " File moving cancelled."))
 
     end = time.time()
     print((
