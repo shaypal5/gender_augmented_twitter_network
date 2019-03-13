@@ -15,7 +15,7 @@ The Dataset
 Structure
 ---------
 
-The *twikwak17* dataset consists of two files:
+The *twikwak17* dataset consists of several files:
 
 * ``twikwak17_uid_list.txt.gz`` - A list of the ids of the user which make up the *twikwak17* network sample. Gzipped.
 * ``twikwak17_social_graph.txt.gz`` - The social graph of all *twikwak17* users.
@@ -114,7 +114,7 @@ An example line might look like:
 7. The seventh stage combines the previous outputs into a single `graphml <http://graphml.graphdrawing.org/primer/graphml-primer.html>`_ object written to the ``twikwak17.graphml.gz`` file.
 
 
-The final output thus consists of four files:
+The final output thus consists of several files:
 
 * ``twikwak17_uid_list.txt.gz`` - A list of the ids of the user which make up the *twikwak17* network sample. Gzipped.
 * ``twikwak17_social_graph.txt.gz`` - The social graph of all *twikwak17* users. This is a sub-graph of *kwak10www* social graph component; a projection of it into the intersection between the *kwak10www* user set and the *twitter7* user set. Gzipped.
