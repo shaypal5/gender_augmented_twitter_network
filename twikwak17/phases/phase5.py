@@ -103,6 +103,7 @@ def convert_uname2gender_map_to_uid2gender_map(
         lines_read = 0
         lines_dumped = 0
         users_not_found = 0
+        mapping_to_non_int_val = 0
         map_lines_to_dump = []
         list_lines_to_dump = []
 
@@ -113,6 +114,7 @@ def convert_uname2gender_map_to_uid2gender_map(
             uname, gender = uname_and_gender_from_line(uname2gender_line)
             try:
                 uid = uname2id[uname]
+                uid = int(uid)
                 map_lines_to_dump.append(f"{uid} {gender}")
                 list_lines_to_dump.append(f"{uid}")
                 if len(map_lines_to_dump) >= 100000:
@@ -131,12 +133,15 @@ def convert_uname2gender_map_to_uid2gender_map(
                     list_lines_to_dump = []
             except KeyError:
                 users_not_found += 1
+            except ValueError:
+                mapping_to_non_int_val += 1
             uname2gender_line = uname2g_f.readline()
             lines_read += 1
             if lines_read % 10000 == 0:
                 qprint((
                     f"{lines_read:,} lines read|"
                     f"{lines_dumped:,} lines dumped|"
+                    f"{mapping_to_non_int_val} bad mappings|"
                     f"{users_not_found:,} users not found. {uname} ~ {uid}"))
         if len(map_lines_to_dump) > 0:
             lines = "\n".join(map_lines_to_dump) + "\n"

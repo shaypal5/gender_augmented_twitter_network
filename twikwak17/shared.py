@@ -257,6 +257,15 @@ def social_graph_fpath_by_dpath(dpath):
     return os.path.join(dpath, SOCIAL_GRAPH_FNAME)
 
 
+# --- phase 7 ---
+
+GRAPHML_FNAME = 'twikwak17.graphml.gz'
+
+
+def graphml_fpath_by_dpath(dpath):
+    return os.path.join(dpath, GRAPHML_FNAME)
+
+
 # -- the final output (ta-da-dum-dum-dum!) ---
 
 SOCGRAPH_FNAME = 'twikwak17_social_graph.txt.gz'
