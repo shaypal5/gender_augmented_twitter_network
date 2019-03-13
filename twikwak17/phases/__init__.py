@@ -18,3 +18,6 @@ from .phase5 import (  # noqa: F401
 from .phase6 import (  # noqa: F401
     phase6,
 )
+from .phase7 import (  # noqa: F401
+    phase7,
+)

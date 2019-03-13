@@ -11,6 +11,7 @@ from .phases import (
     phase4,
     phase5,
     phase6,
+    phase7,
 )
 from .shared import (
     CfgKey,
@@ -159,6 +160,14 @@ def run_phases(
         phase6(
             phase5_output_dpath=phase5_out_dpath,
             phase6_output_dpath=phase6_out_dpath,
+        )
+
+    phase7_out_dpath = phase_output_dpath(7, output_dpath)
+    if '7' in phases:
+        phase7(
+            phase5_output_dpath=phase5_out_dpath,
+            phase6_output_dpath=phase6_out_dpath,
+            phase7_output_dpath=phase7_out_dpath,
         )
 
     qprint("Copying output files to final output folder...")
