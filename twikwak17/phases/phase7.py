@@ -91,7 +91,7 @@ def convert_twikwak17_to_graphml_format(
         The path to the designated output file.
     """
     qprint("Starting to convert twikwak17 to graphml format...")
-    graph_sample_fpath = graphml_fpath[:-3]
+    graph_sample_fpath = graphml_fpath[:-11]+'_sample.graphml.gz'
     with ExitStack() as stack:
         out_f = stack.enter_context(gzip.open(graphml_fpath, 'wt+'))
         sample_f = stack.enter_context(open(graph_sample_fpath, 'wt+'))
