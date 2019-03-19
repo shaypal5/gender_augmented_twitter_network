@@ -1,6 +1,6 @@
 {
-    "twitter7_dpath": "/root/data/twitter7",
-    "kwak10_dpath": "/root/data/kwak10www",
-    "output_dpath": "/root/data/twikwak17",
+    "twitter7_dpath": "/home/user/data/twitter7",
+    "kwak10_dpath": "/home/user/data/kwak10www",
+    "output_dpath": "/home/user/data/twikwak17",
     "quiet": false
 }

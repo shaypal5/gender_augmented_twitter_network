@@ -2,19 +2,32 @@ version: "3.7"
 services:
   twikwak17:
     image: shaypal5/twikwak17:latest
-    entrypoint: /bin/sh
+    user: user
+    entrypoint: /bin/bash
     stdin_open: true
     tty: true
-    ports:
-      - "8888"
-      - "6006"
+    # port mapping is incompatible with network mode host
+    # https://github.com/docker/compose/issues/4799
+    # but network_mode: 'host' makes everything work seamlessly
+    # ports:
+    #   - "8888:8888"
+    #   - "6006:6006"
+    #   - "8080:8080"
+    #   - "4040:4040"
+    network_mode: 'host'
     volumes:
       - type: bind
         source: /home/shaypalachy/Dropbox/data/twitter7
-        target: /root/data/twitter7
+        target: /home/user/data/twitter7
       - type: bind
         source: /home/shaypalachy/Dropbox/data/kwak10www
-        target: /root/data/kwak10www
+        target: /home/user/data/kwak10www
       - type: bind
         source: /home/shaypalachy/Dropbox/data/twikwak17
-        target: /root/data/twikwak17
+        target: /home/user/data/twikwak17
+      - type: bind
+        source: /home/shaypalachy/.ssh
+        target: /home/user/.ssh
+      - type: bind
+        source: /home/shaypalachy/.gitconfig
+        target: /home/user/.gitconfig
