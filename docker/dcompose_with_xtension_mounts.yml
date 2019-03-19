@@ -1,0 +1,35 @@
+version: "3.7"
+x-twitter7-mount:
+  &twitter7-mount
+  type: bind
+  source: /home/shaypalachy/Dropbox/data/twitter7
+  target: /root/data/twitter7
+x-kwak10-mount:
+  &kwak10-mount
+  type: bind
+  source: /home/shaypalachy/Dropbox/data/kwak10www
+  target: /root/data/kwak10www
+x-twikwak17-mount:
+  &twikwak17-mount
+  type: bind
+  source: /home/shaypalachy/Dropbox/data/twikwak17
+  target: /root/data/twikwak17
+services:
+  twikwak17:
+    image: shaypal5/twikwak17:latest
+    entrypoint: /bin/sh
+    ports:
+      - "8888"
+      - "6006"
+    volumes:
+      - type: bind
+        source: /home/shaypalachy/Dropbox/data/twitter7
+        target: /root/data/twitter7
+      - type: bind
+        source: /home/shaypalachy/Dropbox/data/kwak10www
+        target: /root/data/kwak10www
+      - type: bind
+        source: /home/shaypalachy/Dropbox/data/twikwak17
+        target: /root/data/twikwak17
+    stdin_open: true
+    tty: true
