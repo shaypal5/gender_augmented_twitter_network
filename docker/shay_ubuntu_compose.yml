@@ -25,9 +25,9 @@ services:
       - type: bind
         source: /home/shaypalachy/Dropbox/data/twikwak17
         target: /home/user/data/twikwak17
-      - type: bind
-        source: /home/shaypalachy/.ssh
-        target: /home/user/.ssh
-      - type: bind
-        source: /home/shaypalachy/.gitconfig
-        target: /home/user/.gitconfig
+      # - type: bind
+      #   source: /home/shaypalachy/.ssh
+      #   target: /home/user/.ssh
+      # - type: bind
+      #   source: /home/shaypalachy/.gitconfig
+      #   target: /home/user/.gitconfig
