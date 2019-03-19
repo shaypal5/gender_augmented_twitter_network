@@ -3,6 +3,8 @@ services:
   twikwak17:
     image: shaypal5/twikwak17:latest
     entrypoint: /bin/sh
+    stdin_open: true
+    tty: true
     ports:
       - "8888"
       - "6006"
@@ -16,5 +18,3 @@ services:
       - type: bind
         source: /home/shaypalachy/Dropbox/data/twikwak17
         target: /root/data/twikwak17
-    stdin_open: true
-    tty: true
