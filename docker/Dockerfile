@@ -18,4 +18,5 @@ RUN git clone https://github.com/shaypal5/twikwak17 && \
     ls -a && echo $PWD
 WORKDIR /home/user/twikwak17
 RUN python -m pip install -e ".[test]" --user
+RUN git remote set-url origin git@github.com:shaypal5/twikwak17.git
 WORKDIR /home/user/
