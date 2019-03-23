@@ -1,4 +1,4 @@
-"""Phase 7 of the twikwak17 dataset generation process."""
+"""Phase 8 of the twikwak18 dataset generation process."""
 
 import re
 import gc
@@ -8,7 +8,7 @@ import gzip
 from contextlib import ExitStack
 
 
-from twikwak17.shared import (
+from twikwak18.shared import (
     qprint,
     seconds_to_duration_str,
     phase_output_report_fpath,
@@ -23,29 +23,29 @@ from twikwak17.shared import (
 UID_TO_GENDER_REGEX = '(\d+) ([01])'
 
 
-def uid_and_gender_from_line(line):
-    """Breaks down a uid-to-gender line into user id and gender digit.
+def get_uname2uid_map(uid2gender_fpath):
+    qprint("\nLoading uid2gender map from file...")
+    lines_read = 0
+    matching_lines = 0
+    nonmatching_lines = 0
+    uid2gender_map = {}
+    with gzip.open(uid2gender_fpath, 'rt') as uid2gender_f:
+        for line in uid2gender_f:
+            lines_read += 1
+            try:
+                uid, gender = re.findall(UID_TO_GENDER_REGEX, line)[0]
+                uid2gender_map[uid] = gender
+                matching_lines += 1
+            except IndexError:
+                nonmatching_lines += 1
+            if lines_read % 100000 == 0:
+                qprint((
+                    f"{lines_read:,} lines read; {matching_lines:,}"
+                    " lines matched."), end='\r')
+    qprint("uid2gender map loaded from file successfully.\n")
+    return uid2gender
 
-    Parameters
-    ----------
-    line : str
-        A twikwak7 line of the format:
-        "32e72983 1"
 
-    Returns
-    -------
-    uid, gender : str, str
-        A 2-tuple of the user id string and a one-character string of the
-        user's predicted gender. E.g. ('837', '1')
-    """
-    if len(line) < 1:
-        return None, None
-    try:
-        uid, gender = re.findall(UID_TO_GENDER_REGEX, line)[0]
-    except IndexError:
-        qprint("!!!")
-        qprint(line)
-    return uid, gender
 
 
 UID_TO_UID_REGEX = '(\d+)[\t\s]+(\d+)'
@@ -65,7 +65,7 @@ GRAPHML_HEADER = ((
     '    xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns'
     '     http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">\n'
     '  <key id="gender" for="node" attr.name="gender" attr.type="int"/>\n'
-    '  <graph id="twikwak17" edgedefault="directed">\n'
+    '  <graph id="twikwak18" edgedefault="directed">\n'
 ))
 GRAPHML_FOOTER = ((
     '  </graph>\n'
@@ -73,7 +73,7 @@ GRAPHML_FOOTER = ((
 ))
 
 
-def convert_twikwak17_to_graphml_format(
+def convert_twikwak18_to_graphml_format(
         uid2gender_fpath, social_graph_fpath, graphml_fpath,
         graphml_sample_fpath):
     """Projects a user-to-user edge list to a given user intersection list.
@@ -85,15 +85,15 @@ def convert_twikwak17_to_graphml_format(
     Parameters
     ----------
     uid2gender_fpath : str
-        The full qualified path to twikwak17's user-id-to-gender file.
+        The full qualified path to twikwak18's user-id-to-gender file.
     social_graph_fpath : str
-        The full qualified path to twikwak17's social graph file.
+        The full qualified path to twikwak18's social graph file.
     graphml_fpath : str
         The path to the designated output file.
     graphml_sample_fpath : str
         The path to the designated sample output file.
     """
-    qprint("Starting to convert twikwak17 to graphml format...")
+    qprint("Starting to convert twikwak18 to graphml format...")
     with ExitStack() as stack:
         out_f = stack.enter_context(gzip.open(graphml_fpath, 'wt+'))
         sample_f = stack.enter_context(open(graphml_sample_fpath, 'wt+'))
@@ -190,8 +190,8 @@ def convert_twikwak17_to_graphml_format(
     return nodes_dumped, edges_dumped
 
 
-def phase7(phase5_output_dpath, phase6_output_dpath, phase7_output_dpath):
-    """Converts the twikwak17 dataset into the graphml format.
+def phase8(phase5_output_dpath, phase6_output_dpath, phase8_output_dpath):
+    """Converts the twikwak18 dataset into the graphml format.
 
     Parameters
     ----------
@@ -199,25 +199,25 @@ def phase7(phase5_output_dpath, phase6_output_dpath, phase7_output_dpath):
         The path to the output directory of phase 5.
     phase6_output_dpath : str
         The path to the output directory of phase 6.
-    phase7_output_dpath : str
-        The path to the output directory of this phase, phase 7.
+    phase8_output_dpath : str
+        The path to the output directory of this phase, phase 8.
     """
     start = time.time()
     uid2gender_fpath = uid_to_gender_map_fpath_by_dpath(phase5_output_dpath)
     social_graph_fpath = social_graph_fpath_by_dpath(phase6_output_dpath)
-    graphml_fpath = graphml_fpath_by_dpath(phase7_output_dpath)
-    graphml_sample_fpath = graphml_fpath_by_dpath(phase7_output_dpath, True)
-    output_report_fpath = phase_output_report_fpath(7, phase7_output_dpath)
+    graphml_fpath = graphml_fpath_by_dpath(phase8_output_dpath)
+    graphml_sample_fpath = graphml_fpath_by_dpath(phase8_output_dpath, True)
+    output_report_fpath = phase_output_report_fpath(8, phase8_output_dpath)
 
     with open(output_report_fpath, 'wt+') as output_report_f:
         set_output_report_file_handle(output_report_f)
-        qprint("\n\n====== PHASE 7 =====")
+        qprint("\n\n====== PHASE 8 =====")
         qprint((
-            f"Starting phase 7 from \n{uid2gender_fpath} and "
+            f"Starting phase 8 from \n{uid2gender_fpath} and "
             f"\n{social_graph_fpath} \ninput files to {graphml_fpath} "
             "output file."))
 
-        nodes_dumped, edges_dumped = convert_twikwak17_to_graphml_format(
+        nodes_dumped, edges_dumped = convert_twikwak18_to_graphml_format(
             uid2gender_fpath=uid2gender_fpath,
             social_graph_fpath=social_graph_fpath,
             graphml_fpath=graphml_fpath,
@@ -230,7 +230,7 @@ def phase7(phase5_output_dpath, phase6_output_dpath, phase7_output_dpath):
 
         end = time.time()
         qprint((
-            "Finished running phase 7 of the twikwak17 pipeline.\n"
+            "Finished running phase 8 of the twikwak18 pipeline.\n"
             "Run duration: {}".format(seconds_to_duration_str(end - start))
         ))
     set_output_report_file_handle(None)
