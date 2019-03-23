@@ -260,9 +260,12 @@ def social_graph_fpath_by_dpath(dpath):
 # --- phase 7 ---
 
 GRAPHML_FNAME = 'twikwak17.graphml.gz'
+GRAPHML_SAMPLE_FNAME = GRAPHML_FNAME[:-11] + '_sample.graphml.gz'
 
 
-def graphml_fpath_by_dpath(dpath):
+def graphml_fpath_by_dpath(dpath, sample=False):
+    if sample:
+        return os.path.join(dpath, GRAPHML_SAMPLE_FNAME)
     return os.path.join(dpath, GRAPHML_FNAME)
 
 
@@ -287,6 +290,16 @@ OUTPUT_UID_LIST_FNAME = 'twikwak17_uid_list.txt.gz'
 
 def output_uid_list_fpath(output_dpath):
     return os.path.join(output_dpath, OUTPUT_UID_LIST_FNAME)
+
+
+OUTPUT_GRAPHML_FNAME = 'twikwak17.graphml.gz'
+OUTPUT_GRAPHML_SAMPLE_FNAME = 'twikwak17_sample.graphml.gz'
+
+
+def output_graphml_fpath(output_dpath, sample=False):
+    if sample:
+        return os.path.join(output_dpath, OUTPUT_GRAPHML_SAMPLE_FNAME)
+    return os.path.join(output_dpath, OUTPUT_GRAPHML_FNAME)
 
 
 # === printing ===

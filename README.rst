@@ -60,6 +60,24 @@ Once installed, you can run the generation process - and related operations, lik
 You can, of course, only generate the dataset yourself assuming you have the two source datasets. In any case, I would recommend downloading the generated dataset (see the download section) rather than generating it yourself.
 
 
+Docker
+------
+
+Another way to run the ``twikwak17`` code is using the ``shaypal5/twikwak17:latest`` docker image, built over graph-tool's docker image(``tiagopeixoto/graph-tool``). Once downloaded, the easiest way to run it correctly is by configuring the ``shay_ubunyu_compose.yml`` file to your setup:
+
+1. Have the ``twitter7`` and ``kwak10www`` datasets each in a separate directory, and create a designated output directory for ``twikwak17``.
+
+2. Change the source paths for each of the three volume binds in the ``yml`` file to the correct paths on your system.
+
+3. The user you will be using inside the docker image is named ``user`` and has ``uid`` of ``1001``, belonging to the users group ``users`` with a ``gid`` of ``100``. Thus, you need to set write permissions for the ``twikwak17`` directory for this user **in your host system**, not inside the docker! You can do so by running the following command:
+
+   ``sudo chown -R 1001:100 /path/to/twikwak17``
+
+4. Alternatively, give everyone (including non-owners) permission to write to the folder with: ``chmod a+w -r /path/to/twikwak17``.
+
+5. Start the docker image with an interactive shell by running the start script: ``./run.sh``.
+
+
 Process
 -------
 

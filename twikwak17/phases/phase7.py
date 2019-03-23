@@ -74,7 +74,8 @@ GRAPHML_FOOTER = ((
 
 
 def convert_twikwak17_to_graphml_format(
-        uid2gender_fpath, social_graph_fpath, graphml_fpath):
+        uid2gender_fpath, social_graph_fpath, graphml_fpath,
+        graphml_sample_fpath):
     """Projects a user-to-user edge list to a given user intersection list.
 
     All edges between one (or two) users who cannot be found in the given user
@@ -89,12 +90,13 @@ def convert_twikwak17_to_graphml_format(
         The full qualified path to twikwak17's social graph file.
     graphml_fpath : str
         The path to the designated output file.
+    graphml_sample_fpath : str
+        The path to the designated sample output file.
     """
     qprint("Starting to convert twikwak17 to graphml format...")
-    graph_sample_fpath = graphml_fpath[:-11]+'_sample.graphml.gz'
     with ExitStack() as stack:
         out_f = stack.enter_context(gzip.open(graphml_fpath, 'wt+'))
-        sample_f = stack.enter_context(open(graph_sample_fpath, 'wt+'))
+        sample_f = stack.enter_context(open(graphml_sample_fpath, 'wt+'))
         lines_read = 0
         lines_dumped = 0
         lines_to_dump = []
@@ -204,6 +206,7 @@ def phase7(phase5_output_dpath, phase6_output_dpath, phase7_output_dpath):
     uid2gender_fpath = uid_to_gender_map_fpath_by_dpath(phase5_output_dpath)
     social_graph_fpath = social_graph_fpath_by_dpath(phase6_output_dpath)
     graphml_fpath = graphml_fpath_by_dpath(phase7_output_dpath)
+    graphml_sample_fpath = graphml_fpath_by_dpath(phase7_output_dpath, True)
     output_report_fpath = phase_output_report_fpath(7, phase7_output_dpath)
 
     with open(output_report_fpath, 'wt+') as output_report_f:
@@ -218,6 +221,7 @@ def phase7(phase5_output_dpath, phase6_output_dpath, phase7_output_dpath):
             uid2gender_fpath=uid2gender_fpath,
             social_graph_fpath=social_graph_fpath,
             graphml_fpath=graphml_fpath,
+            graphml_sample_fpath=graphml_sample_fpath,
         )
 
         qprint((

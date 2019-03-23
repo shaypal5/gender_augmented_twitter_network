@@ -20,13 +20,36 @@ from .shared import (
     qprint,
     seconds_to_duration_str,
     Session,
+    # phase products meant for final output
     uid_to_gender_map_fpath_by_dpath,
     uid_list_fpath_by_dpath,
     social_graph_fpath_by_dpath,
+    graphml_fpath_by_dpath,
+    # output file paths
     output_social_graph_fpath,
     output_uid2gender_fpath,
     output_uid_list_fpath,
+    output_graphml_fpath,
 )
+
+
+def safe_move(source_fpath, target_fpath, description):
+    try:
+        shutil.move(source_fpath, target_fpath)
+        qprint(f"{description} moved to {target_fpath}")
+    except FileNotFoundError:
+        qprint((f"{description} file not found in {source_fpath}."
+                " Either is was not generated or was already moved."
+                " File moving cancelled."))
+
+
+def safe_copy(source_fpath, target_fpath, description):
+    try:
+        shutil.copy(source_fpath, target_fpath)
+        qprint(f"{description} copied to {target_fpath}")
+    except FileNotFoundError:
+        qprint((f"{description} file not found in {source_fpath}."
+                " Copying cancelled."))
 
 
 def run_pipeline(
@@ -174,31 +197,23 @@ def run_phases(
 
     uid2gender_fpath = uid_to_gender_map_fpath_by_dpath(phase5_out_dpath)
     target_uid2gender = output_uid2gender_fpath(output_dpath)
-    try:
-        shutil.copy(uid2gender_fpath, target_uid2gender)
-        qprint(f"UID-to-gender map copied to {target_uid2gender}")
-    except FileNotFoundError:
-        qprint((f"UID-to-gender map file not found in {uid2gender_fpath}."
-                " Copying cancelled."))
+    safe_copy(uid2gender_fpath, target_uid2gender, "UID-to-gender map")
 
     uid_list_fpath = uid_list_fpath_by_dpath(phase5_out_dpath)
     target_uid_list_fpath = output_uid_list_fpath(output_dpath)
-    try:
-        shutil.copy(uid_list_fpath, target_uid_list_fpath)
-        qprint(f"User ID list copied to {target_uid_list_fpath}")
-    except FileNotFoundError:
-        qprint((f"User ID list file not found in {uid_list_fpath}."
-                " Copying cancelled."))
+    safe_copy(uid_list_fpath, target_uid_list_fpath, "User ID list")
 
     social_graph_fpath = social_graph_fpath_by_dpath(phase6_out_dpath)
     target_socgraph_fpath = output_social_graph_fpath(output_dpath)
-    try:
-        shutil.move(social_graph_fpath, target_socgraph_fpath)
-        qprint(f"Social graph moved to {target_socgraph_fpath}")
-    except FileNotFoundError:
-        qprint((f"Social graph file not found in {social_graph_fpath}."
-                " Either is was not generated or was already moved."
-                " File moving cancelled."))
+    safe_move(social_graph_fpath, target_socgraph_fpath, "Social graph")
+
+    graphml_fpath = graphml_fpath_by_dpath(phase7_out_dpath)
+    target_graphml_fpath = output_graphml_fpath(output_dpath)
+    safe_move(graphml_fpath, target_graphml_fpath, "Graphml graph")
+
+    graphml_s_fpath = graphml_fpath_by_dpath(phase7_out_dpath, sample=True)
+    target_graphml_s_fpath = output_graphml_fpath(output_dpath, sample=True)
+    safe_copy(graphml_s_fpath, target_graphml_s_fpath, "Graphml sample graph")
 
     end = time.time()
     print((
